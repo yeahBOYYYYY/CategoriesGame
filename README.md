@@ -1,2 +1,2 @@
-# ClipHub
-Create, edit and publish clips for the entertainment of the public!
+# AssetsHub
+Create, edit and publish assets such as videos and images for the entertainment of the public!

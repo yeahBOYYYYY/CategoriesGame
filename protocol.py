@@ -76,10 +76,12 @@ class Protocol:
         return data_size_length + data_size + command
 
     @staticmethod
-    def get_msg(sock: socket.socket):
-        @TODO
-        """ Extract message from protocol, without the length field.
-            If length field does not include a number, returns False, "Error" """
+    def get_msg(sock: socket.socket) -> tuple[bool, str]:
+        """
+        Extract message from protocol, without the length field.
+        :param sock: active socket to receive from.
+        :returns: a bool representing if the data and protocol are valid. And a string representing the data, if not valid will return False, "Error".
+        """
 
         # read message size length and make sure it's an integer
         length = sock.recv(Protocol.LENGTH_FIELD_SIZE).decode()
@@ -94,10 +96,4 @@ class Protocol:
         # read message and return
         left = int(size)
         message = sock.recv(left)
-
-        # read until all data was received
-        while len(message) < int(size):
-            left = int(size) - len(message)
-            message += sock.recv(left)
-
-        return True, message
+        return True, message.decode()

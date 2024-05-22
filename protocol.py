@@ -37,7 +37,7 @@ class Protocol:
 
     @staticmethod
     def check_cmd(command: str) -> bool:
-        #@TODO
+        #TODO
         """
         Check if the command is defined in the protocol, including all parameters.
         :param command: the command to send in the socket.

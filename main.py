@@ -1,16 +1,11 @@
-import sys
-from protocol import Protocol
-from client import Client
-from server import Server
+"""
+File to run when starting the server.
+"""
 
-def decipher_and_start(args: list[str]):
-    if args[0] == "client":
-        client = Client(args[1], Protocol.PORT)
-        # client.main()
-    elif args[0] == "server":
-        server = Server("0.0.0.0", 9960)
-        server.main()
+from website import create_app
 
 
-if __name__ == "__main__":
-    decipher_and_start(sys.argv[1:])
+app = create_app() # creates flask server application object
+
+if __name__ == '__main__':
+    app.run(debug=True) # runs flask server application object with live changes

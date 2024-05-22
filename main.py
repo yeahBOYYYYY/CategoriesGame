@@ -6,9 +6,9 @@ from server import Server
 def decipher_and_start(args: list[str]):
     if args[0] == "client":
         client = Client(args[1], Protocol.PORT)
-        client.main()
+        # client.main()
     elif args[0] == "server":
-        server = Server("0.0.0.0", Protocol.PORT)
+        server = Server("0.0.0.0", 9960)
         server.main()
 
 

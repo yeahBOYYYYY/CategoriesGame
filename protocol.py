@@ -37,7 +37,7 @@ class Protocol:
 
     @staticmethod
     def check_cmd(command: str) -> bool:
-        @TODO
+        #TODO
         """
         Check if the command is defined in the protocol, including all parameters.
         :param command: the command to send in the socket.
@@ -84,6 +84,18 @@ class Protocol:
         """
 
         # read message size length and make sure it's an integer
+        response = b""
+        while True:
+            chunk = sock.recv(4096)
+            response = response + chunk
+            if len(chunk) < 4096:  # No more data received, quitting
+                break
+        header_data, _, body = response.partition(b'\r\n\r\n')
+        print(header_data.decode())
+
+        # print(sock.recv(1024).decode())
+        return
+
         length = sock.recv(Protocol.LENGTH_FIELD_SIZE).decode()
         if not length.isdigit():
             return False, "Error"
@@ -96,4 +108,4 @@ class Protocol:
         # read message and return
         left = int(size)
         message = sock.recv(left)
-        return True, message.decode()
+        return True, body

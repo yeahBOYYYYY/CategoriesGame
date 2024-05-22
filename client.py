@@ -3,7 +3,7 @@ from protocol import Protocol
 
 
 class Client:
-    def __init__(self, ip_address: str, port: str = Protocol.PORT):
+    def __init__(self, ip_address: str, port: int = Protocol.PORT):
         """
         Constractor for Client class, creates a socket with parameters given.
         :param ip_address: the ip address of the server.

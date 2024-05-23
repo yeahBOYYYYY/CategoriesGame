@@ -8,6 +8,7 @@ class Protocol:
 
     @staticmethod
     def create_msg(command: str) -> bytes:
+        #TODO: Implement this method
         """
         Create a valid protocol message, with length field.
         :param command: the command to send in the socket.
@@ -22,7 +23,7 @@ class Protocol:
         return data_size_length + data_size + command
 
     @staticmethod
-    def get_msg(sock: socket.socket) -> tuple[bool, str | None]:
+    def get_msg(sock: socket.socket) -> tuple[bool, Command | None]:
         """
         Extract message from protocol, without the length field.
         :param sock: active socket to receive from.
@@ -41,4 +42,8 @@ class Protocol:
         # read message and return
         left = int(size)
         message = sock.recv(left)
-        return True, message.decode()
+
+        try:
+            return True, Command(message)
+        except:
+            return False, None

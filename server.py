@@ -24,8 +24,7 @@ class Server:
 
         # handle requests until user asks to exit
         while True:
-            command = ""
-            valid_protocol, cmd = Protocol.get_msg(client_socket)
+            validity, command = Protocol.get_msg(client_socket)
 
             # if valid_protocol:
             #     # check if params are good, e.g. correct number of params, file name exists

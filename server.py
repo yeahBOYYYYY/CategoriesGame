@@ -1,4 +1,6 @@
 import socket
+
+from command import Command, CommandName
 from protocol import Protocol
 
 
@@ -9,6 +11,7 @@ class Server:
         :param ip_address: the ip address of the server.
         :param port: the port of the server. Default is as in the mutual protocol, not a specific case used port.
         """
+
         self.ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -24,30 +27,27 @@ class Server:
 
         # handle requests until user asks to exit
         while True:
-            validity, command = Protocol.get_msg(client_socket)
+            validity, cmd = Protocol.get_msg(client_socket)
 
-            # if valid_protocol:
-            #     # check if params are good, e.g. correct number of params, file name exists
-            #     # valid_cmd, command, params = self.check_client_request(cmd.decode())
-            #     # if valid_cmd:
-            #     #     response = self.handle_client_request(command, params)
-            #     #
-            #     #     if command == Protocol.SEND_PHOTO:
-            #     #         image_file = open(self.PHOTO_PATH, "rb")
-            #     #         response = image_file.read()
-            #     # else:
-            #     #     response = "Not valid parameters"
-            #     pass
-            # else:
-            #     response = "Packet not according to protocol"
-            #     client_socket.recv(1024)    # clean garbage from socket
-            # response = "Packet not according to protocol"
-            # response = Protocol.create_msg(response)
-            # client_socket.send(response)
+            try:  # handle the request, if not valid will raise an exception
+                response = self.handle_client_request(validity, cmd)
+                print(f"Received: {cmd.command.value} with args {cmd.args}")
+            except:
+                response = Protocol.create_msg(Command(CommandName.ERROR.value))
 
-            if command == Protocol.EXIT:
+            client_socket.send(response)
+            if cmd == CommandName.EXIT:
                 break
 
         self.ServerSocket.close()
         client_socket.close()
         print("Closing connection...")
+
+    def handle_client_request(self, validity: bool, cmd: Command) -> bytes:
+        """
+        Handle the request from the client
+        :param validity: the validity of the command.
+        :param cmd: the command to handle.
+        :returns: the response to the client.
+        """
+        pass

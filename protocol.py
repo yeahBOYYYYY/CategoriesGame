@@ -1,26 +1,37 @@
 import socket
+
 from command import Command
 
 
 class Protocol:
-    LENGTH_FIELD_SIZE = 4
-    PORT = 8820
+    """
+    A class that represents the protocol of the server-client communication.
+    """
+
+    LENGTH_FIELD_SIZE: int = 4  # the size of the length field in the protocol
+    PORT: int = 8820  # the port of the server
 
     @staticmethod
-    def create_msg(command: str) -> bytes:
-        #TODO: Implement this method
+    def create_msg(cmd: Command) -> bytes:
         """
-        Create a valid protocol message, with length field.
-        :param command: the command to send in the socket.
-        :returns: encoded data by the protocol standards.
+        Create a message according to the protocol.
+        :param cmd: the command to send.
+        :returns: the message to send.
         """
-        if type(command) == str:
-            command = command.encode()
+
+        command_name: str = cmd.command.value.encode()
+        args_uncoded: list[str] = cmd.args
+
+        # encode the arguments
+        args = [args_uncoded[i].encode() for i in range(len(args_uncoded))]
+
+        # create encoded message
+        command_bytes: bytes = b" ".join([command_name] + args)
 
         # add the length of data size & the data size to the data
-        data_size = str(len(command)).encode()
+        data_size = str(len(command_bytes)).encode()
         data_size_length = str(len(data_size)).zfill(Protocol.LENGTH_FIELD_SIZE).encode()
-        return data_size_length + data_size + command
+        return data_size_length + data_size + command_bytes
 
     @staticmethod
     def get_msg(sock: socket.socket) -> tuple[bool, Command | None]:
@@ -30,18 +41,18 @@ class Protocol:
         :returns: a bool representing if the data and protocol are valid. And a Command instance or null, depending on the validity.
         """
 
-        length = sock.recv(Protocol.LENGTH_FIELD_SIZE).decode()
+        length: str = sock.recv(Protocol.LENGTH_FIELD_SIZE).decode()
         if not length.isdigit():
             return False, None
 
         # read message size and make sure it's an integer
-        size = sock.recv(int(length)).decode()
+        size: str = sock.recv(int(length)).decode()
         if not size.isdigit():
             return False, None
 
         # read message and return
-        left = int(size)
-        message = sock.recv(left)
+        left: int = int(size)
+        message: bytes = sock.recv(left)
 
         try:
             return True, Command(message)

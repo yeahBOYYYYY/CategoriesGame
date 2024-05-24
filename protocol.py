@@ -10,6 +10,7 @@ class Protocol:
 
     LENGTH_FIELD_SIZE: int = 4  # the size of the length field in the protocol
     PORT: int = 8820  # the port of the server
+    ERROR_LIMIT: int = 10  # limit of sequential errors
 
     @staticmethod
     def create_msg(cmd: Command) -> bytes:

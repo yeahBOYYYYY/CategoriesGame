@@ -8,9 +8,18 @@ class CommandName(Enum):
 
     ERROR: str = "ERROR"  # error message.
     EXIT: str = "EXIT"  # exit from the application.
+    SUCCESS: str = "SUCCESS"  # if command needs conformation
+    FAIL: str = "FAIL"  # if command needs conformation.
+
     LOGIN: str = "LOGIN"  # login to a user.
-    LOGOUT: str = "LOGOUT"  # logout from user.
-    SIGNUP: str = "SIGNUP"  # sign up a new user.  # SCORE = "SCORE"  # score of user.  # GAME_DUAL = "DUAL"  # start  # a 1v1 game.  # GAME_PRACTICE = "PRACTICE"  # start a practice game.  # SUBMIT_ANSWERS = "SUBMIT"  # submits  # answers in a game.  # GAME_ENDED = "ENDED"  # the game have ended.
+    SIGNUP: str = "SIGNUP"  # sign up a new user.
+
+    # LOGOUT: str = "LOGOUT"  # logout from user.
+    # SCORE = "SCORE"  # score of user.
+    # GAME_DUAL = "DUAL"  # start a 1v1 game.
+    # GAME_PRACTICE = "PRACTICE"  # start a practice game.
+    # SUBMIT_ANSWERS = "SUBMIT"  # submits answers in a game.
+    # GAME_ENDED = "ENDED"  # the game have ended.
 
 
 class Command:

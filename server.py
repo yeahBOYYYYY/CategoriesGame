@@ -1,6 +1,7 @@
 import socket
 
 from command import Command, CommandName
+from internal_exception import InternalException
 from protocol import Protocol
 
 
@@ -17,10 +18,11 @@ class Server:
         try:
             self.ServerSocket.bind((ip_address, port))
         except:
-            raise Exception("Please check if a server is running or use a valid ip")
+            raise InternalException("Please check if a server is running or use a valid ip")
 
         self.ServerSocket.listen()
         print("Server is up and running!")
+        print(f"Listening on {ip_address}:{port}")
 
     @staticmethod
     def handle_client_request(validity: bool, cmd: Command, prev_cmd: Command) -> Command:
@@ -33,7 +35,7 @@ class Server:
         """
 
         if not validity:
-            raise Exception("Command given isn't valid.")
+            raise InternalException("Command given isn't valid.")
 
         try:
             match cmd.command:
@@ -43,12 +45,12 @@ class Server:
                     return Command(CommandName.SUCCESS.value)
                 case CommandName.LOGIN:
                     # TODO: login
-                    pass
+                    return Command(CommandName.SUCCESS.value)
                 case CommandName.SIGNUP:
                     # TODO: signup
-                    pass
+                    return Command(CommandName.SUCCESS.value)
                 case _:
-                    raise Exception("Command not meant for server.")
+                    raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards
             raise e
 
@@ -58,8 +60,8 @@ class Server:
         # if the client sends an error message, we need to remember what we sent last
         prev_response_command: Command = Command(CommandName.ERROR.value)
 
-        # sequentially error counter, using array for mutability
-        errors = [0]
+        # sequentially error counter
+        errors: int = 0
 
         # handle requests until user asks to exit
         while True:
@@ -73,12 +75,12 @@ class Server:
 
             # increment number of consecutive errors or reset it
             if prev_response_command == response_command:
-                errors[0] += 1
+                errors += 1
             else:
-                errors[0] = 0
+                errors = 0
 
             # if a lot of errors sequentially then something went wrong, terminating connection
-            if errors[0] >= Protocol.ERROR_LIMIT:
+            if errors >= Protocol.ERROR_LIMIT:
                 break
 
             # renew the prev command to be the last one

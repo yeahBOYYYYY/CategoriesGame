@@ -1,5 +1,7 @@
 from enum import Enum
 
+from internal_exception import InternalException
+
 
 class CommandName(Enum):
     """
@@ -28,7 +30,13 @@ class Command:
     """
 
     params_per_command: dict[CommandName, int] = {  # number of parameters expected for each command
-        CommandName.ERROR: 0, CommandName.EXIT: 0, CommandName.LOGIN: 2, CommandName.SIGNUP: 3, CommandName.LOGOUT: 0, }
+        CommandName.ERROR: 0,
+        CommandName.EXIT: 0,
+        CommandName.SUCCESS: 0,
+        CommandName.FAIL: 0,
+        CommandName.LOGIN: 2,
+        CommandName.SIGNUP: 3,
+    }
 
     def __init__(self, data: str | bytes):
         if isinstance(data, bytes):
@@ -36,12 +44,15 @@ class Command:
         words: list[str] = self.extract_words(data)
 
         if words[0] not in CommandName:
-            raise Exception("Command not defined in the protocol")
+            raise InternalException("Command not defined in the protocol")
         self.command: CommandName = CommandName(words[0])
 
         if len(words) - 1 != Command.params_per_command[self.command]:
-            raise Exception("Invalid number of parameters for the command")
+            raise InternalException("Invalid number of parameters for the command")
         self.args: list[str] = words[1:]
+
+    def __str__(self) -> str:
+        return f"{self.command.value} {' '.join(self.args)}"
 
     @staticmethod
     def extract_words(data: str) -> list[str]:

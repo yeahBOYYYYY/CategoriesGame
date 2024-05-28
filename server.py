@@ -13,14 +13,14 @@ class Server:
         :param port: the port of the server. Default is as in the mutual protocol, not a specific case used port.
         """
 
-        self.ServerSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
-            self.ServerSocket.bind((ip_address, port))
+            self.server_socket.bind((ip_address, port))
         except:
             raise InternalException("Please check if a server is running or use a valid ip")
 
-        self.ServerSocket.listen()
+        self.server_socket.listen()
         print("Server is up and running!")
         print(f"Listening on {ip_address}:{port}")
 
@@ -55,7 +55,7 @@ class Server:
             raise e
 
     def main(self):
-        client_socket, client_address = self.ServerSocket.accept()
+        client_socket, client_address = self.server_socket.accept()
 
         # if the client sends an error message, we need to remember what we sent last
         prev_response_command: Command = Command(CommandName.ERROR.value)
@@ -67,7 +67,7 @@ class Server:
         while True:
             validity, cmd = Protocol.get_msg(client_socket)
 
-            try:  # handle the request, if not valid will raise an exception
+            try:  # handle the request, if not valid will send an exception
                 response_command: Command = self.handle_client_request(validity, cmd, prev_response_command)
                 print(f"Received: {cmd.command.value} with args {cmd.args}")
             except:
@@ -93,6 +93,6 @@ class Server:
             if cmd == CommandName.EXIT:
                 break
 
-        self.ServerSocket.close()
+        self.server_socket.close()
         client_socket.close()
         print("Closing connection...")

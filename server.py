@@ -3,6 +3,7 @@ import socket
 from command import Command, CommandName
 from internal_exception import InternalException
 from protocol import Protocol
+from Database.database import Database
 
 
 class Server:
@@ -24,8 +25,34 @@ class Server:
         print("Server is up and running!")
         print(f"Listening on {ip_address}:{port}")
 
-    @staticmethod
-    def handle_client_request(validity: bool, cmd: Command, prev_cmd: Command) -> Command:
+        self.database = Database()
+
+    def handle_login_request(self, username: str, password: str) -> Command:
+        """
+        Check if the user login info are valid in the database.
+        :param username: the username of the client.
+        :param password: the password of the client.
+        :returns: the response command to the client.
+        """
+
+        if self.database.is_valid_user(username, password):
+            return Command(CommandName.SUCCESS.value)
+        return Command(CommandName.FAIL.value)
+
+    def handle_signup_request(self, username: str, password: str, email: str) -> Command:
+        """
+        Check if the user login info are valid in the database, if they are add them to the database.
+        :param username: the username of the client.
+        :param password: the password of the client.
+        :param email: the email of the client.
+        :returns: the response command to the client.
+        """
+
+        if self.database.add_user(username, password, email):
+            return Command(CommandName.SUCCESS.value)
+        return Command(CommandName.FAIL.value)
+
+    def handle_client_request(self, validity: bool, cmd: Command, prev_cmd: Command) -> Command:
         """
         Handle the request from the client
         :param validity: the validity of the command.
@@ -44,11 +71,9 @@ class Server:
                 case CommandName.EXIT:
                     return Command(CommandName.SUCCESS.value)
                 case CommandName.LOGIN:
-                    # TODO: login
-                    return Command(CommandName.SUCCESS.value)
+                    return self.handle_login_request(*cmd.args)
                 case CommandName.SIGNUP:
-                    # TODO: signup
-                    return Command(CommandName.SUCCESS.value)
+                    return self.handle_signup_request(*cmd.args)
                 case _:
                     raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards
@@ -90,7 +115,7 @@ class Server:
             response = Protocol.create_msg(response_command)
             client_socket.send(response)
 
-            if cmd == CommandName.EXIT:
+            if cmd.command == CommandName.EXIT:
                 break
 
         self.server_socket.close()

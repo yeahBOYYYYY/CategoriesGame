@@ -43,11 +43,12 @@ class Client:
         return command
 
     @staticmethod
-    def handle_server_response(validity: bool, cmd: Command) -> Command:
+    def handle_server_response(validity: bool, cmd: Command, last_command: Command) -> Command:
         """
         Handle the request from the client
         :param validity: the validity of the command.
         :param cmd: the command to handle.
+        :param last_command: the last command that the user have sent to the server.
         :returns: the response command to the client.
         """
 
@@ -59,29 +60,36 @@ class Client:
                 case CommandName.ERROR:
                     return Client.get_command_from_user()
                 case CommandName.SUCCESS:
-                    # TODO: login
-                    return Command(CommandName.SUCCESS.value)
-                case CommandName.SIGNUP:
-                    # TODO: signup
-                    return Command(CommandName.SUCCESS.value)
+                    # TODO: success
+                    print("Success!")
+                    return Client.get_command_from_user()
+                case CommandName.FAIL:
+                    # TODO: fail
+                    print("Fail!")
+                    return Client.get_command_from_user()
                 case _:
                     raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards
             raise e
 
     def main(self):
-        request_command: Command = self.get_command_from_user()
-        request = Protocol.create_msg(request_command)
+        # the last command that the user have sent to the server.
+        sent_command: Command = self.get_command_from_user()
+        request = Protocol.create_msg(sent_command)
+
         self.server_socket.send(request)
 
         while True:
             validity, cmd = Protocol.get_msg(self.server_socket)
 
             try:  # handle the response, if not valid will send an exception
-                response_command: Command = self.handle_server_response(validity, cmd)
                 print(f"Received: {cmd.command.value} with args {cmd.args}")
+                response_command: Command = self.handle_server_response(validity, cmd, sent_command)
             except:
                 response_command: Command = Command(CommandName.ERROR.value)
+
+            # update the last command sent to the server.
+            sent_command = response_command
 
             # create the final message to return to client.
             response = Protocol.create_msg(response_command)

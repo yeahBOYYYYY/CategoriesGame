@@ -1,6 +1,7 @@
 import os
 import re
 import sqlite3
+import sys
 
 
 class Database:
@@ -10,7 +11,7 @@ class Database:
 
     def __init__(self, database_file: str = 'Database/database.db'):
         # connect to the database that will be created in this folder
-        self.conn = sqlite3.connect(database_file)
+        self.conn = sqlite3.connect(database_file, check_same_thread=False)
 
         self.cursor = self.conn.cursor()
 

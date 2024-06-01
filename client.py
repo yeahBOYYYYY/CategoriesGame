@@ -19,8 +19,8 @@ class Client:
 
         try:
             self.server_socket.connect((ip_address, port))
-        except:
-            raise InternalException("Please check if a server is running or use a valid ip")
+        except Exception as e:
+            raise InternalException("Please check if a server is running or use a valid ip", e)
 
     @staticmethod
     def get_command_from_user() -> Command:

@@ -1,5 +1,6 @@
 import sys
 
+import internal_exception
 from client import Client
 from internal_exception import InternalException
 from protocol import Protocol
@@ -23,25 +24,10 @@ def start_server() -> None:  # python main.py server
     server = Server("0.0.0.0", Protocol.PORT)
     server.main()
 
-def handel_exceptions(ex: Exception, debug: bool) -> None:
-    """
-    Handle exceptions that occur in the main function.
-    :param ex: the exception that occurred.
-    :param debug: if the debug mode is on.
-    """
-    if debug:
-        print(ex)
-    else:
-        if isinstance(ex, InternalException):
-            print("\nEXCEPTION:" + str(ex))
-        else:
-            print("\nEXCEPTION: An error occurred")
-
 def main(args: list[str]):
-    debug = False
     try:
         if args[0] == "-d":  # set debug mode
-            debug = True
+            InternalException.debug = True
             args = args[1:]
         else:
             sys.tracebacklimit = 0  # make it not show tree of exceptions
@@ -55,7 +41,7 @@ def main(args: list[str]):
             raise InternalException("Invalid arguments")
 
     except Exception as ex:
-        handel_exceptions(ex, debug)
+        internal_exception.handel_exceptions(ex)
 
 
 if __name__ == "__main__":

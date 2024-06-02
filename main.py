@@ -1,10 +1,10 @@
 import sys
 
 import internal_exception
-from client import Client
+from Client.client import Client
 from internal_exception import InternalException
 from protocol import Protocol
-from server import Server
+from Server.server import Server
 
 
 def start_client(ip: str) -> None:  # python main.py client 127.0.0.1

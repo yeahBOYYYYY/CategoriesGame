@@ -1,15 +1,13 @@
-import os
 import re
 import sqlite3
-import sys
 
 
 class Database:
     """
-    Database class for handling database operations
+    Database class for handling sqlite3 database operations.
     """
 
-    def __init__(self, database_file: str = 'Database/database.db'):
+    def __init__(self, database_file: str = 'Server/Database/database.db'):
         # connect to the database that will be created in this folder
         self.conn = sqlite3.connect(database_file, check_same_thread=False)
 
@@ -140,12 +138,12 @@ class Database:
 
 
 if __name__ == '__main__':
-    # db = Database('database.db')
-    # print(db.add_user("user1", "password1", "ron@gmail.com"))
-    # print(db.add_user("user8", "nigga!", "bulbul@yahoo.org"))
-    # print(db.add_user("user69", "nigga?!", "bulbul"))
-    # print(db)
-    # del db
+    db = Database('database.db')
+    print(db.add_user("user1", "password1", "ron@gmail.com"))
+    print(db.add_user("user8", "nigga!", "bulbul@yahoo.org"))
+    print(db.add_user("user69", "nigga?!", "bulbul"))
+    print(db)
+    del db
 
     print(Database.is_valid_email("w@gmail.com"))
     print(Database.is_valid_email("lol@yahho.org"))

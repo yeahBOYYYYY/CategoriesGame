@@ -11,7 +11,7 @@ class CommandName(Enum):
     ERROR: str = "ERROR"  # error message.
     EXIT: str = "EXIT"  # exit from the application.
     SUCCESS: str = "SUCCESS"  # if command needs conformation
-    FAIL: str = "FAIL"  # if command needs conformation.
+    FAIL: str = "FAIL"  # if command need conformation.
 
     LOGIN: str = "LOGIN"  # login to a user.
     SIGNUP: str = "SIGNUP"  # sign up a new user.

@@ -1,4 +1,8 @@
 class InternalException(Exception):
+    """
+    An exception class that is used for internal exceptions.
+    """
+
     debug = False  # debug mode
 
     def __init__(self, message, e: Exception = None):

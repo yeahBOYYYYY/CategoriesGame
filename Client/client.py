@@ -6,6 +6,10 @@ from protocol import Protocol
 
 
 class Client:
+    """
+    The client class, responsible for the client side of the application.
+    """
+
     def __init__(self, ip_address: str, port: int = Protocol.PORT):
         """
         Constractor for Client class, creates a socket with parameters given.

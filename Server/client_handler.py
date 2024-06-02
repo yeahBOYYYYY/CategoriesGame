@@ -1,42 +1,30 @@
 import socket
-import sys
-import threading
 
-import select
-
-import internal_exception
+from Server.Database.database import Database
 from command import Command, CommandName
 from internal_exception import InternalException
 from protocol import Protocol
-from Database.database import Database
 
 
-class Server:
-    def __init__(self, ip_address: str, port: int = Protocol.PORT):
+class ClientHandler:
+    """
+    The client handler class, handles the server client communication side of the server.
+    """
+
+    def __init__(self, client_socket: socket.socket, client_address: tuple[str, int], database: Database):
         """
-        Constractor for Client class, creates a socket with parameters given.
-        :param ip_address: the ip address of the server.
-        :param port: the port of the server. Default is as in the mutual protocol, not a specific case used port.
+        Constractor for ClientHandler class, initializes the client values.
+        :param client_socket: the socket of the client.
+        :param client_address: the address of the client.
         """
 
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print(f"Handling connection with {client_address}")
 
-        try:
-            # allow other sockets to bind to this port
-            self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.server_socket.bind((ip_address, port))
-        except Exception as e:
-            raise InternalException("Please check if a server is running or use a valid ip", e)
+        self.client_socket = client_socket
+        self.client_address = client_address
+        self.database = database
 
-        self.server_socket.listen()
-        print("Server is up and running!")
-        print(f"Listening on {ip_address}:{port}")
-
-        # threads list to keep track of all clients
-        self.threads: list[threading.Thread] = []
-
-        # create a database object
-        self.database: Database = Database()
+        self.username: str | None = None
 
     def login_request(self, username: str, password: str) -> Command:
         """
@@ -47,6 +35,7 @@ class Server:
         """
 
         if self.database.is_valid_user(username, password):
+            self.username = username
             return Command(CommandName.SUCCESS.value)
         return Command(CommandName.FAIL.value)
 
@@ -60,6 +49,7 @@ class Server:
         """
 
         if self.database.add_user(username, password, email):
+            self.username = username
             return Command(CommandName.SUCCESS.value)
         return Command(CommandName.FAIL.value)
 
@@ -90,14 +80,10 @@ class Server:
         except Exception as e:  # if there is a problem in Command class, move it upwards
             raise e
 
-    def handle_client(self, client_socket: socket.socket, client_address: tuple[str, int]) -> None:
+    def handle_client(self) -> None:
         """
-        Handle the client.
-        :param client_socket: the socket of the client.
-        :param client_address: the address of the client.
+        Handles the sending and receiving from the client.
         """
-
-        print(f"Handling connection with {client_address}")
 
         # if the client sends an error message, we need to remember what we sent last
         prev_response_command: Command = Command(CommandName.ERROR.value)
@@ -107,7 +93,7 @@ class Server:
 
         # handle requests until user asks to exit
         while True:
-            validity, cmd = Protocol.get_msg(client_socket)
+            validity, cmd = Protocol.get_msg(self.client_socket)
 
             try:  # handle the request, if not valid will send an exception
                 response_command: Command = self.handle_request(validity, cmd, prev_response_command)
@@ -131,33 +117,10 @@ class Server:
 
             # create the final message to return to client.
             response = Protocol.create_msg(response_command)
-            client_socket.send(response)
+            self.client_socket.send(response)
 
             if cmd.command == CommandName.EXIT:
                 break
 
-        client_socket.close()
-        print(f"Closing connection with {client_address}")
-
-    def main(self):
-        try:
-            while True:
-                client_socket, client_address = self.server_socket.accept()
-                print(f"Connection from {client_address}")
-
-                # start a thread for the client
-                try:
-                    t = threading.Thread(target=self.handle_client, args=(client_socket, client_address))
-                    t.start()
-                    self.threads.append(t)
-                except InternalException as e:
-                    internal_exception.handel_exceptions(e)
-                    client_socket.close()
-
-        except Exception as e:
-            raise InternalException("Server has stopped working due to an error.", e)
-        finally:
-            print("Server is shutting down...")
-            for thread in self.threads:
-                thread.join()
-            self.server_socket.close()
+        self.client_socket.close()
+        print(f"Closing connection with {self.client_address}")

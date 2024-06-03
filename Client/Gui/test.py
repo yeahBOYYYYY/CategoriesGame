@@ -1,8 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+LARGEFONT = ("Verdana", 35)
 
-class Window(tk.Tk):
+class tkinterApp(tk.Tk):
     def __init__(self, *args, **kwargs):
         # __init__ function for class Tk
         tk.Tk.__init__(self, *args, **kwargs)

@@ -9,6 +9,7 @@ class CommandName(Enum):
     """
 
     ERROR: str = "ERROR"  # error message.
+    HELLO: str = "HELLO"  # hello message.
     EXIT: str = "EXIT"  # exit from the application.
     SUCCESS: str = "SUCCESS"  # if command needs conformation
     FAIL: str = "FAIL"  # if command need conformation.
@@ -31,6 +32,7 @@ class Command:
 
     params_per_command: dict[CommandName, int] = {  # number of parameters expected for each command
         CommandName.ERROR: 0,
+        CommandName.HELLO: 1,
         CommandName.EXIT: 0,
         CommandName.SUCCESS: 0,
         CommandName.FAIL: 0,
@@ -39,15 +41,20 @@ class Command:
     }
 
     def __init__(self, data: str | bytes):
-        if isinstance(data, bytes):
-            data: str = data.decode()
-        words: list[str] = self.extract_words(data)
+        """
+        Constructor for Command class.
+        :param data: the command and parameters passed in the socket.
+        """
 
-        if words[0] not in CommandName:
+        if isinstance(data, bytes):  # if the data is bytes, decode it
+            data: str = data.decode()
+        words: list[str] = self.extract_words(data)  # extract the command and parameters
+
+        if words[0] not in CommandName:  # check if the command is defined in the protocol
             raise InternalException("Command not defined in the protocol")
         self.command: CommandName = CommandName(words[0])
 
-        if len(words) - 1 != Command.params_per_command[self.command]:
+        if len(words) - 1 != Command.params_per_command[self.command]:  # check if the number of parameters is valid
             raise InternalException("Invalid number of parameters for the command")
         self.args: list[str] = words[1:]
 

@@ -1,5 +1,6 @@
 import socket
 import threading
+import rsa
 
 import internal_exception
 from Server.client_handler import ClientHandler
@@ -39,6 +40,9 @@ class Server:
         # create a database object
         self.database: Database = Database()
 
+        # generate public and private keys for communication
+        self.public_key, self.private_key = rsa.newkeys(Protocol.RSA_KEY_SIZE)
+
     def stop_server(self):
         """
         Method to stop the server.
@@ -75,7 +79,7 @@ class Server:
 
                 # start a thread for the client
                 try:
-                    user = ClientHandler(client_socket, client_address, self.database)
+                    user = ClientHandler(client_socket, client_address, self)
                     t = threading.Thread(target=user.handle_client)
                     t.start()
                     self.users.append((user, t))

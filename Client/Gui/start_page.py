@@ -15,14 +15,14 @@ class StartPage(PageTemplate):
         Place the widgets in the frame.
         """
 
-        start_button = ttk.Button(self, text="Start game")
+        start_button = ttk.Button(self, text="Start game", command=self.window.show_page("GamePage"))
         start_button.place(x=800, y=200, width=50, height=50)
 
-        start_button = ttk.Button(self, text="Login")
-        start_button.place(x=300, y=200, width=50, height=50)
+        login_button = ttk.Button(self, text="Login", command=self.window.show_page("LoginPage"))
+        login_button.place(x=300, y=200, width=50, height=50)
 
-        start_button = ttk.Button(self, text="Signup")
-        start_button.place(x=400, y=200, width=50, height=50)
+        signup_button = ttk.Button(self, text="Signup", command=self.window.show_page("SignupPage"))
+        signup_button.place(x=400, y=200, width=50, height=50)
 
-        start_button = ttk.Button(self, text="Exit")
-        start_button.place(x=500, y=200, width=50, height=50)
+        exit_button = ttk.Button(self, text="Exit", command=self.exit_event)
+        exit_button.place(x=500, y=200, width=50, height=50)

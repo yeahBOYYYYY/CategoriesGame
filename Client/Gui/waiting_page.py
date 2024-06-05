@@ -15,5 +15,5 @@ class WaitingPage(PageTemplate):
         Place the widgets in the frame.
         """
 
-        start_button = ttk.Button(self, text="Start")
+        start_button = ttk.Button(self, text="WAITING")
         start_button.place(x=400, y=200, width=50, height=50)

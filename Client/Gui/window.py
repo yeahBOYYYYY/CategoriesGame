@@ -1,3 +1,4 @@
+from typing import Callable
 import tkinter as tk
 
 from PIL import Image, ImageTk
@@ -18,7 +19,9 @@ class Window(tk.Tk):
 
     window_size: tuple[int, int] = (1200, 800)
     background_image_path: str = "background_image.jpg"
-    pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage, PageTemplate]
+    pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage]
+
+    showing_page: str | None = None
 
     def __init__(self):
         """
@@ -46,17 +49,33 @@ class Window(tk.Tk):
         bg_image: ImageTk.PhotoImage = ImageTk.PhotoImage(bg_image_resized)
         return bg_image
 
-    def show_page(self, page_name: str) -> None:
+    def show_page(self, page_name: str) -> Callable[[], None]:
         """
         Show the page with the given name.
         :param page_name: the page name of the page to show.
+        :return: the function to show the page, to give button command to call.
         """
 
-        if page_name not in self.page_instances:
-            raise InternalException(f"Page {page_name} not found.")
+        def inner_show_page() -> None:
+            """
+            Show the page with the given name.
+            """
 
-        page = self.page_instances[page_name]
-        tk.Misc.lift(page)  # display the page
+            # page not found
+            if page_name not in self.page_instances:
+                raise InternalException(f"Page {page_name} not found.")
+
+            page = self.page_instances[page_name]
+
+            # hide the current page
+            if (self.showing_page != page_name) and (not self.showing_page is None):
+                self.page_instances[self.showing_page].unshow_self()
+
+            # show the new page
+            page.show_self()
+            self.showing_page = page_name
+
+        return inner_show_page
 
     def initialize_pages(self) -> None:
         """
@@ -68,7 +87,7 @@ class Window(tk.Tk):
             self.page_instances[P.__name__] = page
 
         # show the start page
-        self.show_page("PageTemplate")
+        self.show_page("StartPage")()
 
 
 if __name__ == "__main__":

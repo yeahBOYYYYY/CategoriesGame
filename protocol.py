@@ -1,6 +1,8 @@
 import socket
+import rsa
 
 from command import Command
+from internal_exception import InternalException
 
 
 class Protocol:
@@ -8,15 +10,20 @@ class Protocol:
     A class that represents the protocol of the server-client communication.
     """
 
-    LENGTH_FIELD_SIZE: int = 4  # the size of the length field in the protocol
+    RSA_KEY_SIZE: int = 1024  # the size of the RSA key
+    MESSAGE_LENGTH_BITS = RSA_KEY_SIZE - 88  # the maximum length of the message in bits
+
+    LENGTH_FIELD_SIZE: int = 10  # the size of the length field
+
     PORT: int = 9960  # the port of the server
     ERROR_LIMIT: int = 10  # limit of sequential errors
 
     @staticmethod
-    def create_msg(cmd: Command) -> bytes:
+    def create_msg(cmd: Command, public_encrypt: rsa.key.PublicKey | None = None) -> bytes:
         """
         Create a message according to the protocol.
         :param cmd: the command to send.
+        :param public_encrypt: encrypt the data with receiver public RSA key, if no RSA than None.
         :returns: the message to send.
         """
 
@@ -27,18 +34,21 @@ class Protocol:
         args = [args_uncoded[i].encode() for i in range(len(args_uncoded))]
 
         # create encoded message
-        command_bytes: bytes = b" ".join([command_name] + args)
+        command_bits: bytes = b" ".join([command_name] + args)
 
-        # add the length of data size & the data size to the data
-        data_size = str(len(command_bytes)).encode()
-        data_size_length = str(len(data_size)).zfill(Protocol.LENGTH_FIELD_SIZE).encode()
+        if len(command_bits) > Protocol.MESSAGE_LENGTH_BITS:
+            raise InternalException("Message too long to send.")
+
+        command_bits.zfill()
+
         return data_size_length + data_size + command_bytes
 
     @staticmethod
-    def get_msg(sock: socket.socket) -> tuple[bool, Command | None]:
+    def get_msg(sock: socket.socket, private_encrypt: rsa.key.PrivateKey | None = None) -> tuple[bool, Command | None]:
         """
         Extract message from protocol, without the length field.
         :param sock: active socket to receive from.
+        :param private_encrypt: if the data is encrypted will contain the private RSA key, else None.
         :returns: a bool representing if the data and protocol are valid. And a Command instance or null, depending on the validity.
         """
 

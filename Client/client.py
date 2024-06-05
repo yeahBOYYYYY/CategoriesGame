@@ -1,4 +1,5 @@
 import socket
+
 import rsa
 
 from command import Command, CommandName
@@ -56,7 +57,7 @@ class Client:
         Handle the request from the client
         :param validity: the validity of the command.
         :param cmd: the command to handle.
-        :param last_command: the last command that the user have sent to the server.
+        :param last_command: the last command that the user has sent to the server.
         :returns: the response command to the client.
         """
 
@@ -86,8 +87,6 @@ class Client:
         :return: True if the handshake was successful, False otherwise.
         """
 
-        print(self.public_key)
-
         # get HELLO with public key from server.
         validity, cmd = Protocol.get_msg(self.server_socket)
         if not validity:
@@ -98,7 +97,7 @@ class Client:
         server_public_key = rsa.PublicKey(int(cmd.args[0]), 65537)
 
         # send HELLO with public key to server.
-        response = Protocol.create_msg(Command(CommandName.HELLO.value + " " + str(self.public_key.n)))
+        response = Protocol.create_msg(Command(CommandName.HELLO.value, str(self.public_key.n)))
         self.server_socket.send(response)
 
         # get SUCCESS from server.
@@ -107,8 +106,6 @@ class Client:
             raise InternalException("Command given isn't valid.")
         elif cmd.command != CommandName.SUCCESS:
             raise InternalException("Command given isn't valid.")
-
-        print(server_public_key)
 
         return server_public_key
 
@@ -120,7 +117,7 @@ class Client:
             self.server_socket.close()
             raise InternalException("Handshake failed. Closing connection.")
 
-        # the last command that the user have sent to the server.
+        # the last command that the user has sent to the server.
         sent_command: Command = self.get_command_from_user()
         request = Protocol.create_msg(sent_command, server_public_key)
 

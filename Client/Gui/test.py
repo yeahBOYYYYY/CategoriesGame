@@ -1,124 +1,103 @@
-import tkinter as tk
-from tkinter import ttk
-
-LARGEFONT = ("Verdana", 35)
-
-class tkinterApp(tk.Tk):
-    def __init__(self, *args, **kwargs):
-        # __init__ function for class Tk
-        tk.Tk.__init__(self, *args, **kwargs)
-
-        # creating a container
-        container = tk.Frame(self)
-        container.pack(side="top", fill="both", expand=True)
-
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        # initializing frames to an empty array
-        self.frames = {}
-
-        # iterating through a tuple consisting
-        # of the different page layouts
-        for F in (StartPage, Page1, Page2):
-            frame = F(container, self)
-
-            # initializing frame of that object from
-            # startpage, page1, page2 respectively with
-            # for loop
-            self.frames[F] = frame
-
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame(StartPage)
-
-    def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
+from PySide6.QtCore import Slot, QCoreApplication
+from PySide6.QtGui import QPixmap, QPalette, QBrush
+from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QDialog, QLineEdit, QVBoxLayout, QHBoxLayout, \
+    QWidget, QSpacerItem, QSizePolicy
 
 
-# first window frame startpage
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
-class StartPage(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
+        # Set background image
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(QPixmap("background_image.jpg")))
+        self.setPalette(palette)
 
-        # label of frame Layout 2
-        label = ttk.Label(self, text="Startpage", font=LARGEFONT)
+        # Create buttons
+        self.start_game_button = QPushButton("Start Game")
+        self.start_game_button.setEnabled(False)
+        self.start_game_button.setFixedHeight(100)  # Set height
+        self.start_game_button.clicked.connect(self.start_game)  # Connect to start_game method
 
-        # putting the grid in its place by using
-        # grid
-        label.grid(row=0, column=4, padx=10, pady=10)
+        start_game_layout = QHBoxLayout()
+        start_game_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))  # Add spacer
+        start_game_layout.addWidget(self.start_game_button)
+        start_game_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))  # Add spacer
 
-        button1 = ttk.Button(self, text="Page 1",
-                             command=lambda: controller.show_frame(Page1))
+        self.login_button = QPushButton("Login")
+        self.login_button.setFixedHeight(50)  # Set height
 
-        # putting the button in its place by
-        # using grid
-        button1.grid(row=1, column=1, padx=10, pady=10)
+        self.exit_button = QPushButton("Exit")
+        self.exit_button.setFixedHeight(50)  # Set height
+        self.exit_button.clicked.connect(QCoreApplication.instance().quit)  # Connect to quit method
 
-        ## button to show frame 2 with text layout2
-        button2 = ttk.Button(self, text="Page 2",
-                             command=lambda: controller.show_frame(Page2))
+        # Create layout for smaller buttons
+        button_layout = QHBoxLayout()
+        button_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))  # Add spacer
+        button_layout.addWidget(self.login_button)
+        button_layout.addWidget(self.exit_button)
+        button_layout.addItem(QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))  # Add spacer
 
-        # putting the button in its place by
-        # using grid
-        button2.grid(row=2, column=1, padx=10, pady=10)
+        # Create main layout
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(start_game_layout)
+        main_layout.addLayout(button_layout)
 
+        # Create a central widget and set the layout
+        central_widget = QWidget()
+        central_widget.setLayout(main_layout)
+        self.setCentralWidget(central_widget)
 
-# second window frame page1
-class Page1(tk.Frame):
+        # Connect buttons
+        self.login_button.clicked.connect(self.open_login_window)
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text="Page 1", font=LARGEFONT)
-        label.grid(row=0, column=4, padx=10, pady=10)
+    @Slot()
+    def open_login_window(self):
+        self.login_window = LoginWindow(self)
+        self.login_window.show()
 
-        # button to show frame 2 with text
-        # layout2
-        button1 = ttk.Button(self, text="StartPage",
-                             command=lambda: controller.show_frame(StartPage))
-
-        # putting the button in its place
-        # by using grid
-        button1.grid(row=1, column=1, padx=10, pady=10)
-
-        # button to show frame 2 with text
-        # layout2
-        button2 = ttk.Button(self, text="Page 2",
-                             command=lambda: controller.show_frame(Page2))
-
-        # putting the button in its place by
-        # using grid
-        button2.grid(row=2, column=1, padx=10, pady=10)
-
-
-# third window frame page2
-class Page2(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-        label = ttk.Label(self, text="Page 2", font=LARGEFONT)
-        label.grid(row=0, column=4, padx=10, pady=10)
-
-        # button to show frame 2 with text
-        # layout2
-        button1 = ttk.Button(self, text="Page 1",
-                             command=lambda: controller.show_frame(Page1))
-
-        # putting the button in its place by
-        # using grid
-        button1.grid(row=1, column=1, padx=10, pady=10)
-
-        # button to show frame 3 with text
-        # layout3
-        button2 = ttk.Button(self, text="Startpage",
-                             command=lambda: controller.show_frame(StartPage))
-
-        # putting the button in its place by
-        # using grid
-        button2.grid(row=2, column=1, padx=10, pady=10)
+    @Slot()
+    def start_game(self):
+        # Add code here to start the game
+        pass
 
 
-# Driver Code
-app = tkinterApp()
-app.mainloop()
+class LoginWindow(QDialog):
+    def __init__(self, main_window):
+        super().__init__()
+
+        self.main_window = main_window
+
+        # Create username and password fields
+        self.username_field = QLineEdit()
+        self.password_field = QLineEdit()
+        self.password_field.setEchoMode(QLineEdit.Password)
+
+        # Create buttons
+        self.back_button = QPushButton("Back")
+        self.submit_button = QPushButton("Submit")
+
+        # Arrange widgets vertically
+        layout = QVBoxLayout()
+        layout.addWidget(self.username_field)
+        layout.addWidget(self.password_field)
+        layout.addWidget(self.back_button)
+        layout.addWidget(self.submit_button)
+        self.setLayout(layout)
+
+        # Connect buttons
+        self.back_button.clicked.connect(self.close)
+        self.submit_button.clicked.connect(self.check_credentials)
+
+    @Slot()
+    def check_credentials(self):
+        # Check username and password (this is just a placeholder)
+        if self.username_field.text() == "user" and self.password_field.text() == "pass":
+            self.main_window.start_game_button.setEnabled(True)
+            self.close()
+
+
+app = QApplication([])
+window = MainWindow()
+window.show()
+app.exec()

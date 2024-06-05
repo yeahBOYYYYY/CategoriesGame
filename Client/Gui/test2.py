@@ -1,23 +1,73 @@
 import tkinter as tk
-from PIL import Image, ImageTk
 
-def on_resize(event):
-    # resize the background image to the size of label
-    image = bgimg.resize((event.width, event.height), Image.Resampling.LANCZOS)
-    # update the image of the label
-    l.image = ImageTk.PhotoImage(image)
-    l.config(image=l.image)
 
-root = tk.Tk()
-root.geometry('800x600')
+class GameApp(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Game App")
+        self.geometry("800x600")
 
-bgimg = Image.open('background_image.jpg') # load the background image
-l = tk.Label(root)
-l.place(x=0, y=0, relwidth=1, relheight=1) # make label l to fit the parent window always
-l.bind('<Configure>', on_resize) # on_resize will be executed whenever label l is resized
+        self.frames = {}
 
-tk.Label(root, text='Some File').grid(row=0)
-e1 = tk.Entry(root)
-e1.grid(row=0, column=1)
+        for F in (StartPage, PageOne, PageTwo):
+            page_name = F.__name__
+            frame = F(parent=self, controller=self)
+            self.frames[page_name] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
 
-root.mainloop()
+        self.show_frame("StartPage")
+
+    def show_frame(self, page_name):
+        frame = self.frames[page_name]
+        frame.tkraise()
+
+
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        self.configure(bg="lightblue")
+
+        label = tk.Label(self, text="Start Page", font=("Arial", 24))
+        label.pack(side="top", fill="x", pady=10)
+
+        button1 = tk.Button(self, text="Go to Page One",
+                            command=lambda: controller.show_frame("PageOne"))
+        button1.pack()
+
+        button2 = tk.Button(self, text="Go to Page Two",
+                            command=lambda: controller.show_frame("PageTwo"))
+        button2.pack()
+
+
+class PageOne(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        self.configure(bg="lightgreen")
+
+        label = tk.Label(self, text="Page One", font=("Arial", 24))
+        label.pack(side="top", fill="x", pady=10)
+
+        button = tk.Button(self, text="Go to Start Page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+
+
+class PageTwo(tk.Frame):
+    def __init__(self, parent, controller):
+        super().__init__(parent)
+        self.controller = controller
+        self.configure(bg="lightcoral")
+
+        label = tk.Label(self, text="Page Two", font=("Arial", 24))
+        label.pack(side="top", fill="x", pady=10)
+
+        button = tk.Button(self, text="Go to Start Page",
+                           command=lambda: controller.show_frame("StartPage"))
+        button.pack()
+
+
+if __name__ == "__main__":
+    app = GameApp()
+    app.mainloop()

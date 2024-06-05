@@ -17,6 +17,11 @@ class CommandName(Enum):
     LOGIN: str = "LOGIN"  # login to a user.
     SIGNUP: str = "SIGNUP"  # sign up a new user.
 
+    INFO_REQUEST: str = "REQIN"  # request for information.
+    INFO_RESPONSE: str = "RESIN"  # response for information.
+
+    pass
+
     # LOGOUT: str = "LOGOUT"  # logout from user.
     # SCORE = "SCORE"  # score of user.
     # GAME_DUAL = "DUAL"  # start a 1v1 game.
@@ -38,9 +43,22 @@ class Command:
         CommandName.FAIL: 0,
         CommandName.LOGIN: 2,
         CommandName.SIGNUP: 3,
+        CommandName.INFO_REQUEST: 0,
+        CommandName.INFO_RESPONSE: 3
     }
 
-    def __init__(self, data: str | bytes):
+    def __init__(self, *args: str | bytes | CommandName):
+        """
+        Constructor for Command class, calls other 'constructors'.
+        :param args: the command and parameters passed in the socket.
+        """
+
+        if len(args) == 1:
+            self.__init_one(args[0])
+        else:
+            self.__init_one(" ".join(args))
+
+    def __init_one(self, data: str | bytes):
         """
         Constructor for Command class.
         :param data: the command and parameters passed in the socket.

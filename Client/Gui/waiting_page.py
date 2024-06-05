@@ -1,14 +1,19 @@
 from __future__ import annotations
 
-import tkinter as tk
 from tkinter import ttk
 
+from Client.Gui.page_template import PageTemplate
 
-class WaitingPage(ttk.Frame):
-    def __init__(self, parent: tk.Canvas, controller: Window):
+
+class WaitingPage(PageTemplate):
+    """
+    Waiting page of the application.
+    """
+
+    def place_widgets(self) -> None:
         """
-        Initialize the waiting page of the application.
-        :param parent: the parent of the frame.
-        :param controller: the main window of the application.
+        Place the widgets in the frame.
         """
-        super().__init__()
+
+        start_button = ttk.Button(self, text="Start")
+        start_button.place(x=400, y=200, width=50, height=50)

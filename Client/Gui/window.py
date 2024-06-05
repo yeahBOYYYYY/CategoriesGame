@@ -1,13 +1,14 @@
 import tkinter as tk
-from tkinter import ttk
 
 from PIL import Image, ImageTk
 
-from Client.Gui.start_page import StartPage
-from Client.Gui.login_page import LoginPage
-from Client.Gui.signup_page import SignupPage
-from Client.Gui.waiting_page import WaitingPage
 from Client.Gui.game_page import GamePage
+from Client.Gui.login_page import LoginPage
+from Client.Gui.page_template import PageTemplate
+from Client.Gui.signup_page import SignupPage
+from Client.Gui.start_page import StartPage
+from Client.Gui.waiting_page import WaitingPage
+from internal_exception import InternalException
 
 
 class Window(tk.Tk):
@@ -15,8 +16,9 @@ class Window(tk.Tk):
     The main window of the application.
     """
 
+    window_size: tuple[int, int] = (1200, 800)
     background_image_path: str = "background_image.jpg"
-    pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage]
+    pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage, PageTemplate]
 
     def __init__(self):
         """
@@ -26,47 +28,35 @@ class Window(tk.Tk):
 
         # set title and window size
         self.title("Categories game")
-        self.geometry("600x400")
+        self.geometry(f"{self.window_size[0]}x{self.window_size[1]}")
+        self.resizable(False, False)
 
-        # Create background image on canvas
-        self.bg_image: Image = Image.open(self.background_image_path)
-        self.PhotoImage = ImageTk.PhotoImage(self.bg_image)
-
-        # Create a canvas for the pages
-        self.canvas: tk.Canvas | None = None
-        self.initialize_canvas()
+        self.image = self.initialize_image()
 
         # pages in the application
-        self.page_instances: dict[ttk.Frame] = {}
+        self.page_instances: dict[str, PageTemplate] = {}
         self.initialize_pages()
 
         # Start the main loop of tkinter
         self.mainloop()
 
-    def initialize_image(self) -> None:
-        """
-        Initialize the background image.
-        """
+    def initialize_image(self) -> ImageTk.PhotoImage:
+        bg_image_raw = Image.open(self.background_image_path)
+        bg_image_resized = bg_image_raw.resize(self.window_size, Image.Resampling.LANCZOS)
+        bg_image: ImageTk.PhotoImage = ImageTk.PhotoImage(bg_image_resized)
+        return bg_image
 
-        # place the image in the canvas behind everything
-        self.image_label.place(x=0, y=0, relwidth=1, relheight=1)
-
-        # Bind the background image to resize event
-        self.image_label.bind("<Configure>", self.resize_background)
-
-    def initialize_canvas(self) -> None:
+    def show_page(self, page_name: str) -> None:
         """
-        Initialize the canvas of the pages.
+        Show the page with the given name.
+        :param page_name: the page name of the page to show.
         """
 
-        self.canvas = tk.Canvas(self)
+        if page_name not in self.page_instances:
+            raise InternalException(f"Page {page_name} not found.")
 
-        self.canvas.create_image(0, 0, image=self.PhotoImage, anchor="nw")
-
-        # make the canvas fit the parent window always and have a grid layout
-        self.canvas.grid(sticky='nsew')
-        self.canvas.grid_rowconfigure(0, weight=1)
-        self.canvas.grid_columnconfigure(0, weight=1)
+        page = self.page_instances[page_name]
+        tk.Misc.lift(page)  # display the page
 
     def initialize_pages(self) -> None:
         """
@@ -74,68 +64,11 @@ class Window(tk.Tk):
         """
 
         for P in self.pages:
-            page = P(self.canvas, self)  # create instance of the page
-            self.page_instances[P] = page
-            page.grid(row=0, column=0, sticky="nsew")
+            page = P(self)  # create instance of the page
+            self.page_instances[P.__name__] = page
 
         # show the start page
-        self.show_page(StartPage)
-
-    def resize_background(self, event: tk.Event | None) -> None:
-        """
-        Resize the background image to fit the canvas size.
-        """
-
-        # resize the background image to the size of label
-        image = self.bg_image.resize((event.width, event.height), Image.Resampling.LANCZOS)
-        # update the image of the label
-        self.image_label.image = ImageTk.PhotoImage(image)
-        self.image_label.config(image=self.image_label.image)
-
-    def show_page(self, cont: ttk.Frame) -> None:
-        """
-        Show the page with the given key.
-        :param cont: the key of the page to show.
-        """
-
-        page = self.page_instances[cont]
-        page.tkraise()  # display the page
-
-
-    def show_start_page(self) -> None:
-        """
-        Show the start page.
-        """
-
-        self.show_page(StartPage)
-
-    def show_login_page(self) -> None:
-        """
-        Show the start page.
-        """
-
-        self.show_page(LoginPage)
-
-    def show_signup_page(self) -> None:
-        """
-        Show the start page.
-        """
-
-        self.show_page(SignupPage)
-
-    def show_waiting_page(self) -> None:
-        """
-        Show the waiting page.
-        """
-
-        self.show_page(WaitingPage)
-
-    def show_game_page(self) -> None:
-        """
-        Show the game page.
-        """
-
-        self.show_page(GamePage)
+        self.show_page("PageTemplate")
 
 
 if __name__ == "__main__":

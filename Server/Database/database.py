@@ -97,6 +97,21 @@ class Database:
         except:
             return False
 
+    def get_mail(self, username: str) -> str:
+        """
+        Get the email of a user.
+        :param username: the username of the user.
+        :return: the email of the user.
+        """
+
+        try:
+            # get the email of the user
+            self.cursor.execute("SELECT email FROM users WHERE username = ?;", (username,))
+            email = self.cursor.fetchone()
+            return email[0]
+        except:
+            return ""
+
     def get_score(self, username: str) -> tuple[int, int]:
         """
         Get the score of a user, tuple of wins and losses.

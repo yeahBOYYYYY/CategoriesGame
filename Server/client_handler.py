@@ -31,7 +31,7 @@ class ClientHandler:
 
     def login_request(self, username: str, password: str) -> Command:
         """
-        Check if the user login info are valid in the database.
+        Check if the user login info is valid in the database.
         :param username: the username of the client.
         :param password: the password of the client.
         :returns: the response command to the client.
@@ -56,6 +56,19 @@ class ClientHandler:
             return Command(CommandName.SUCCESS.value)
         return Command(CommandName.FAIL.value)
 
+    def info_request(self) -> Command:
+        """
+        Get the info of the user.
+        :returns: the response command to the client.
+        """
+
+        if self.username is None:
+            return Command(CommandName.FAIL.value)
+        else:
+            user_mail = self.server.database.get_mail(self.username)
+            user_score = self.server.database.get_score(self.username)
+        return Command(CommandName.INFO_RESPONSE.value, self.username, user_mail, user_score)
+
     def handle_request(self, validity: bool, cmd: Command, prev_cmd: Command) -> Command:
         """
         Handles the request from the client.
@@ -78,6 +91,8 @@ class ClientHandler:
                     return self.login_request(*cmd.args)
                 case CommandName.SIGNUP:
                     return self.signup_request(*cmd.args)
+                case CommandName.INFO_REQUEST:
+                    return self.info_request()
                 case _:
                     raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards
@@ -89,10 +104,8 @@ class ClientHandler:
         :return: True if the handshake was successful, False otherwise.
         """
         
-        print(self.server.public_key)
-        
         # send HELLO with public key to client.
-        response = Protocol.create_msg(Command(CommandName.HELLO.value + " " + str(self.server.public_key.n)))
+        response = Protocol.create_msg(Command(CommandName.HELLO.value, str(self.server.public_key.n)))
         self.client_socket.send(response)
 
         # get HELLO with public key from client.
@@ -103,8 +116,6 @@ class ClientHandler:
             raise InternalException("Command given isn't valid.")
 
         client_public_key = rsa.PublicKey(int(cmd.args[0]), 65537)
-
-        print(client_public_key)
 
         # send SUCCESS to client.
         response = Protocol.create_msg(Command(CommandName.SUCCESS.value))

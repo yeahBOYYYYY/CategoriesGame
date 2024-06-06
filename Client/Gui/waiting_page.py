@@ -13,6 +13,11 @@ class WaitingPage(PageTemplate):
     Waiting page of the application.
     """
 
+    def __init__(self, window: "Window"):
+        super().__init__(window)
+        self.letter: str | None = None
+        self.opponent_username: str | None = None
+
     def show_self(self) -> None:
         """
         Show the frame.
@@ -26,12 +31,11 @@ class WaitingPage(PageTemplate):
         if (not validity) or (response.command != CommandName.MATCH):
             raise InternalException("Failed to send or get command from the server.")
         else:
-            opponent_username: str = response.args[0]
-            letter: str = response.args[1]
+            self.opponent_username = response.args[0]
+            self.letter = response.args[1]
 
-            print(f"Matched with {opponent_username} and got letter {letter}.")
-
-        # TODO close thread
+            print(f"Matched with {self.opponent_username} and got letter {self.letter}.")
+            self.window.show_page("GamePage")()
 
     def ask_to_play(self) -> None:
         """

@@ -29,7 +29,7 @@ class Client:
         try:
             self.server_socket.connect((ip_address, port))
         except Exception as e:
-            raise InternalException("Please check if a server is running or use a valid ip", e)
+            raise InternalException("Please check if a server is running or use a valid ip.", e)
 
         # generate public and private keys for communication
         self.public_key, self.private_key = rsa.newkeys(Protocol.RSA_KEY_SIZE)

@@ -37,8 +37,7 @@ def main(args: list[str]):
         elif (args[0] == "server") and (len(args) == 1):  # server mode
             start_server()
         else:
-            print(args)
-            raise InternalException("Invalid arguments")
+            raise InternalException("Invalid arguments.")
 
     except Exception as ex:
         internal_exception.handel_exceptions(ex)

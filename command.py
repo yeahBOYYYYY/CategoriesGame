@@ -79,6 +79,9 @@ class Command:
     def __str__(self) -> str:
         return f"{self.command.value} {' '.join(self.args)}"
 
+    def __eq__(self, other):
+        return (self.command == other.command) and (self.args == other.args)
+
     @staticmethod
     def extract_words(data: str) -> list[str]:
         """

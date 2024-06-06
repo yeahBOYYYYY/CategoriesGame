@@ -5,12 +5,15 @@ import rsa
 from command import Command, CommandName
 from internal_exception import InternalException
 from protocol import Protocol
+from Client.Gui.window import Window
 
 
 class Client:
     """
     The client class, responsible for the client side of the application.
     """
+
+    username: str | None = None  # client's username if logged to the server
 
     def __init__(self, ip_address: str, port: int = Protocol.PORT):
         """
@@ -31,10 +34,12 @@ class Client:
         # generate public and private keys for communication
         self.public_key, self.private_key = rsa.newkeys(Protocol.RSA_KEY_SIZE)
 
+        self.server_public_key: rsa.PublicKey | None = None
+
     @staticmethod
     def get_command_from_user() -> Command:
         """
-        Get a command from the user.
+        Get a command from the user, used for no GUI.
         :return: the command to send to the server.
         """
 
@@ -54,7 +59,8 @@ class Client:
     @staticmethod
     def handle_server_response(validity: bool, cmd: Command, last_command: Command) -> Command:
         """
-        Handle the request from the client
+        Handle the request from the client, used for no GUI.
+        Has limited commands available, Login, Signup, Exit, Error.
         :param validity: the validity of the command.
         :param cmd: the command to handle.
         :param last_command: the last command that the user has sent to the server.
@@ -69,15 +75,11 @@ class Client:
                 case CommandName.ERROR:
                     return Client.get_command_from_user()
                 case CommandName.SUCCESS:
-                    # TODO: success
-                    print("Success!")
                     return Client.get_command_from_user()
                 case CommandName.FAIL:
-                    # TODO: fail
-                    print("Fail!")
                     return Client.get_command_from_user()
                 case _:
-                    raise InternalException("Command not meant for server.")
+                    raise InternalException("Command not meant for client.")
         except Exception as e:  # if there is a problem in Command class, move it upwards
             raise e
 
@@ -109,7 +111,11 @@ class Client:
 
         return server_public_key
 
-    def main(self):
+    def main_user_input(self) -> None:
+        """
+        Used as the main function of the client when no GUI is needed, responsible for the communication with the server.
+        """
+
         # start communication by exchanging public keys
         try:
             server_public_key: rsa.PublicKey | None = self.three_way_handshake()
@@ -135,6 +141,41 @@ class Client:
             # update the last command sent to the server.
             sent_command = response_command
 
-            # create the final message to return to client.
+            # create the final message to return to the client.
             response = Protocol.create_msg(response_command, server_public_key)
             self.server_socket.send(response)
+
+    def main(self):
+        """
+        Main function of the client with GUI.
+        """
+
+        # start communication by exchanging public keys
+        try:
+            self.server_public_key = self.three_way_handshake()
+        except:
+            self.server_socket.close()
+            raise InternalException("Handshake failed. Closing connection.")
+
+        # create the main GUI window
+        window: Window = Window(self)
+
+    def send_and_get(self, cmd: Command) -> tuple[bool, Command]:
+        """
+        Send a command to the server and get a response.
+        :param cmd: the command to send to the server.
+        :return: the validity of the command and the command itself.
+        """
+
+        sent_command: Command = cmd
+        request = Protocol.create_msg(sent_command, self.server_public_key)
+        self.server_socket.send(request)
+
+        validity, cmd = Protocol.get_msg(self.server_socket, self.private_key)
+
+        return validity, cmd
+
+
+if __name__ == "__main__":
+    client = Client("127.0.0.1")
+    client.main_user_input()

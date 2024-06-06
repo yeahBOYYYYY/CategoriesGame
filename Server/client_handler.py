@@ -4,6 +4,7 @@ import rsa
 
 from Server.Database.database import Database
 from command import Command, CommandName
+import internal_exception
 from internal_exception import InternalException
 from protocol import Protocol
 
@@ -169,9 +170,12 @@ class ClientHandler:
 
             # create the final message to return to the client.
             response = Protocol.create_msg(response_command, client_public_key)
-            self.client_socket.send(response)
+            try:
+                self.client_socket.send(response)
+            except Exception as e:
+                internal_exception.handel_exceptions(e)
 
-            if cmd.command == CommandName.EXIT:
+            if (cmd is not None) and (cmd.command == CommandName.EXIT):
                 break
 
         self.client_socket.close()

@@ -18,16 +18,18 @@ class Window(tk.Tk):
     """
 
     window_size: tuple[int, int] = (1200, 800)
-    background_image_path: str = "background_image.jpg"
+    background_image_path: str = "./Client/Gui/background_image.jpg"
     pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage]
 
     showing_page: str | None = None
 
-    def __init__(self):
+    def __init__(self, client: "Client"):
         """
         Initialize the main window of the application.
         """
         super().__init__()
+
+        self.client: "Client" = client
 
         # set title and window size
         self.title("Categories game")

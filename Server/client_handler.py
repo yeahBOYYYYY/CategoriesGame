@@ -1,5 +1,9 @@
 from __future__ import annotations
+
+import random
 import socket
+import threading
+
 import rsa
 
 from Server.Database.database import Database
@@ -14,7 +18,10 @@ class ClientHandler:
     The client handler class, handles the server client communication side of the server.
     """
 
-    def __init__(self, client_socket: socket.socket, client_address: tuple[str, int], server: "Server.server.Server"):
+    hebrew_alphabet = ['א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ז', 'ח', 'ט', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ', 'ק',
+                       'ר', 'ש', 'ת']
+
+    def __init__(self, client_socket: socket.socket, client_address: tuple[str, int], server: "Server"):
         """
         Constractor for ClientHandler class, initializes the client values.
         :param client_socket: the socket of the client.
@@ -28,7 +35,12 @@ class ClientHandler:
         self.client_address = client_address
         self.server = server
 
+        # used for identification of the user
         self.username: str | None = None
+
+        # used ONLY for the client handler of the match
+        self.opponent: ClientHandler | None = None
+        self.letter: str | None = None
 
     def login_request(self, username: str, password: str) -> Command:
         """
@@ -70,6 +82,52 @@ class ClientHandler:
             user_score = self.server.database.get_score(self.username)
         return Command(CommandName.INFO_RESPONSE.value, self.username, user_mail, user_score)
 
+    def random_letter_for_match(self) -> str:
+        """
+        Get a random hebrew letter for the match.
+        :returns: a random hebrew letter.
+        """
+
+        return random.choice(self.hebrew_alphabet)
+
+    def wait_for_match(self) -> Command:
+        """
+        Wait for a user pair for a match.
+        """
+
+        if self.username is None:
+            return Command(CommandName.FAIL.value)
+
+        waited: bool = False  # if the user was in the waiting list
+
+        with self.server.waiting_users_condition:
+            if not self.server.waiting_users:
+                # If the waiting_users list is empty, append yourself and go to sleep
+                self.server.waiting_users.append(self)
+                waited = True
+                self.server.waiting_users_condition.wait()
+
+            if not waited:
+                # If there is a thread in the list, check if it's alive
+                partner = self.server.waiting_users.pop(0)
+                if self.server.users[partner].is_alive():
+
+                    # choose a random letter for the match
+                    self.letter = self.random_letter_for_match()
+                    partner.letter = self.letter
+
+                    # set the opponent for both users
+                    partner.opponent = self
+                    self.opponent = partner
+
+                    # notify the opponent that you are his partner
+                    self.server.waiting_users_condition.notify()
+                else:
+                    # If the thread is dead, go recursively to the bottom of the list
+                    return self.wait_for_match()
+        return Command(CommandName.MATCH.value, self.opponent.username, self.letter)
+
+
     def handle_request(self, validity: bool, cmd: Command, prev_cmd: Command) -> Command:
         """
         Handles the request from the client.
@@ -94,6 +152,8 @@ class ClientHandler:
                     return self.signup_request(*cmd.args)
                 case CommandName.INFO_REQUEST:
                     return self.info_request()
+                case CommandName.WAITING:
+                    return self.wait_for_match()
                 case _:
                     raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards

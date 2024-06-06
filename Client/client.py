@@ -170,6 +170,7 @@ class Client:
         sent_command: Command = cmd
         request = Protocol.create_msg(sent_command, self.server_public_key)
         self.server_socket.send(request)
+        print("Sent command to server.")
 
         validity, cmd = Protocol.get_msg(self.server_socket, self.private_key)
 

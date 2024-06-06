@@ -108,4 +108,12 @@ class LoginPage(PageTemplate):
             return
         else:
             self.window.client.username = username_to_submit
+            self.open_start_game_button()
             return
+
+    def open_start_game_button(self):
+        """
+        Open the start game button for the client after logging in.
+        """
+
+        self.window.page_instances["StartPage"].start_button.config(state="enabled")

@@ -20,14 +20,9 @@ class CommandName(Enum):
     INFO_REQUEST: str = "REQIN"  # request for information.
     INFO_RESPONSE: str = "RESIN"  # response for information.
 
-    pass
-
-    # LOGOUT: str = "LOGOUT"  # logout from user.
-    # SCORE = "SCORE"  # score of user.
-    # GAME_DUAL = "DUAL"  # start a 1v1 game.
-    # GAME_PRACTICE = "PRACTICE"  # start a practice game.
-    # SUBMIT_ANSWERS = "SUBMIT"  # submits answers in a game.
-    # GAME_ENDED = "ENDED"  # the game have ended.
+    WAITING: str = "WAITING"  # waiting for a game.
+    MATCH: str = "MATCH"  # match with another player.
+    ANSWERS: str = "ANSWERS"  # answers to the questions.
 
 
 class Command:
@@ -44,7 +39,9 @@ class Command:
         CommandName.LOGIN: 2,
         CommandName.SIGNUP: 3,
         CommandName.INFO_REQUEST: 0,
-        CommandName.INFO_RESPONSE: 3
+        CommandName.INFO_RESPONSE: 3,
+        CommandName.WAITING: 0,
+        CommandName.MATCH: 2
     }
 
     def __init__(self, *args: str | bytes | CommandName):

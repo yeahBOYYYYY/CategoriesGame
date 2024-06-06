@@ -35,7 +35,12 @@ class Server:
         print(f"Listening on {ip_address}:{port}")
 
         # threads list to keep track of all clients
-        self.users: list[tuple[ClientHandler, threading.Thread]] = []
+        self.users: dict[ClientHandler, threading.Thread] = {}
+
+        # users that wait for a match
+        self.waiting_users: list[ClientHandler] = []
+        # condition for thread to wait for a match
+        self.waiting_users_condition = threading.Condition()
 
         # create a database object
         self.database: Database = Database()
@@ -49,8 +54,8 @@ class Server:
         """
 
         print("Server is shutting down...")
-        for _, thread in self.users:
-            thread.join()
+        for user in self.users:
+            self.users[user].join()
         self.server_socket.close()
 
     def listen_for_exit(self):
@@ -82,7 +87,7 @@ class Server:
                     user = ClientHandler(client_socket, client_address, self)
                     t = threading.Thread(target=user.handle_client)
                     t.start()
-                    self.users.append((user, t))
+                    self.users[user] = t
                 except InternalException as e:
                     internal_exception.handel_exceptions(e)
                     client_socket.close()

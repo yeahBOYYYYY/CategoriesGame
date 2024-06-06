@@ -61,10 +61,12 @@ class Protocol:
 
         try:
             if private_encrypt is not None:
-                    aes_key_encoded = sock.recv(int(Protocol.RSA_KEY_SIZE / 8))  # convert bit to byte
-                    aes_nonce_encoded = sock.recv(int(Protocol.RSA_KEY_SIZE / 8))  # uuid is always 16 bytes
-                    aes_key = rsa.decrypt(aes_key_encoded, private_encrypt)
-                    aes_nonce = rsa.decrypt(aes_nonce_encoded, private_encrypt)
+                print("waiting for AES key")
+                aes_key_encoded = sock.recv(int(Protocol.RSA_KEY_SIZE / 8))  # convert bit to byte
+                print("waiting for AES nonce")
+                aes_nonce_encoded = sock.recv(int(Protocol.RSA_KEY_SIZE / 8))  # uuid is always 16 bytes
+                aes_key = rsa.decrypt(aes_key_encoded, private_encrypt)
+                aes_nonce = rsa.decrypt(aes_nonce_encoded, private_encrypt)
 
             # read the length of size header the message
             length: str = sock.recv(Protocol.LENGTH_FIELD_SIZE).decode()

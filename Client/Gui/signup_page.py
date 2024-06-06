@@ -23,9 +23,9 @@ class SignupPage(PageTemplate):
         self.password: tk.StringVar = tk.StringVar()
         self.email: tk.StringVar = tk.StringVar()
 
-        self.username_entry: ttk.Entry | None = None
-        self.password_entry: ttk.Entry | None = None
-        self.email_entry: ttk.Entry | None = None
+        self.username_entry: ttk.Entry = ttk.Entry(self, textvariable=self.username)
+        self.password_entry: ttk.Entry = ttk.Entry(self, textvariable=self.password)
+        self.email_entry: ttk.Entry = ttk.Entry(self, textvariable=self.email)
 
     def place_widgets(self) -> None:
         """
@@ -44,13 +44,9 @@ class SignupPage(PageTemplate):
         exit_button = ttk.Button(self, text="Exit", command=self.exit_event)
         exit_button.place(x=500, y=200, width=50, height=50)
 
-        self.username_entry = ttk.Entry(self, textvariable=self.username)
+        # place entries
         self.username_entry.place(x=400, y=300, width=200, height=50)
-
-        self.password_entry = ttk.Entry(self, textvariable=self.password)
         self.password_entry.place(x=400, y=400, width=200, height=50)
-
-        self.email_entry = ttk.Entry(self, textvariable=self.email)
         self.email_entry.place(x=400, y=500, width=200, height=50)
 
     def lock_entries(self):
@@ -58,18 +54,28 @@ class SignupPage(PageTemplate):
         Lock the entries while used for signuping.
         """
 
+        # lock the entries to prevent user from changing them
         self.username_entry.config(state="disabled")
         self.password_entry.config(state="disabled")
         self.email_entry.config(state="disabled")
+
+        # lock the entries in the login page
+        self.window.page_instances["LoginPage"].username_entry.config(state="disabled")
+        self.window.page_instances["LoginPage"].password_entry.config(state="disabled")
 
     def unlock_entries(self):
         """
         Unlock the entries while used for signuping.
         """
 
+        # unlock the entries to allow user to change them
         self.username_entry.config(state="enabled")
         self.password_entry.config(state="enabled")
         self.email_entry.config(state="enabled")
+
+        # unlock the entries in the login page
+        self.window.page_instances["LoginPage"].username_entry.config(state="enabled")
+        self.window.page_instances["LoginPage"].password_entry.config(state="enabled")
 
     def submit_signup_info(self):
         """

@@ -28,7 +28,7 @@ class Server:
             self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.server_socket.bind((ip_address, port))
         except Exception as e:
-            raise InternalException("Please check if a server is running or use a valid ip", e)
+            raise InternalException("Please check if a server is already running or use a valid ip", e)
 
         self.server_socket.listen()
         print("Server is up and running!")

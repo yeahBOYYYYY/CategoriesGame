@@ -3,12 +3,12 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 
-from Client.Gui.game_page import GamePage
-from Client.Gui.login_page import LoginPage
+from Client.Gui.Pages.game_page import GamePage
+from Client.Gui.Pages.login_page import LoginPage
 from Client.Gui.page_template import PageTemplate
-from Client.Gui.signup_page import SignupPage
-from Client.Gui.start_page import StartPage
-from Client.Gui.waiting_page import WaitingPage
+from Client.Gui.Pages.signup_page import SignupPage
+from Client.Gui.Pages.start_page import StartPage
+from Client.Gui.Pages.waiting_page import WaitingPage
 from internal_exception import InternalException
 
 
@@ -18,18 +18,20 @@ class Window(tk.Tk):
     """
 
     window_size: tuple[int, int] = (1200, 800)
-    background_image_path: str = "./Client/Gui/background_image.jpg"
     pages = [StartPage, LoginPage, SignupPage, WaitingPage, GamePage]
 
     showing_page: str | None = None
 
-    def __init__(self, client: "Client"):
+    def __init__(self, client: "Client", background_image_path: str = "./Client/Gui/background_image.jpg"):
         """
         Initialize the main window of the application.
+        :param client: The client of the application.
+        :param background_image_path: The path to the background image of the window.
         """
         super().__init__()
 
         self.client: "Client" = client
+        self.background_image_path: str = background_image_path
 
         # set title and window size
         self.title("Categories game")
@@ -46,6 +48,10 @@ class Window(tk.Tk):
         self.mainloop()
 
     def initialize_image(self) -> ImageTk.PhotoImage:
+        """
+        Initialize the background image of the window.
+        :return: the background image of the window.
+        """
         bg_image_raw = Image.open(self.background_image_path)
         bg_image_resized = bg_image_raw.resize(self.window_size, Image.Resampling.LANCZOS)
         bg_image: ImageTk.PhotoImage = ImageTk.PhotoImage(bg_image_resized)
@@ -91,6 +97,24 @@ class Window(tk.Tk):
         # show the start page
         self.show_page("StartPage")()
 
+    @staticmethod
+    def create_text_with_outline(canvas: tk.Canvas, x: int, y: int, text_color: str, outline_color: str, **kwargs) -> None:
+        """
+        Create text with an outline.
+        :param canvas: The canvas to draw the text on.
+        :param x: The x coordinate of the text.
+        :param y: The y coordinate of the text.
+        :param text_color: The color of the text.
+        :param outline_color: The color of the outline.
+        :param kwargs: The other arguments to pass to the create_text function.
+        """
+
+        # Create the outline text
+        canvas.create_text(x, y, fill=outline_color, **kwargs)
+
+        # Create the actual text slightly offset from the outline
+        canvas.create_text(x - 1, y - 1, fill=text_color, **kwargs)
+
 
 if __name__ == "__main__":
-    Window()
+    Window(None, "background_image.jpg")

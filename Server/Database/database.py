@@ -1,3 +1,4 @@
+import hashlib
 import re
 import sqlite3
 
@@ -8,6 +9,10 @@ class Database:
     """
 
     def __init__(self, database_file: str = 'Server/Database/database.db'):
+        """
+        Constructor for the Database class.
+        :param database_file: the file path of the database.
+        """
         # connect to the database that will be created in this folder
         self.conn = sqlite3.connect(database_file, check_same_thread=False)
 
@@ -16,7 +21,7 @@ class Database:
         # set a new table for the users information
         self.cursor.execute("""CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
-            password TEXT,
+            password BLOB,
             email TEXT,
             wins INTEGER DEFAULT 0,
             losses INTEGER DEFAULT 0
@@ -43,6 +48,19 @@ class Database:
         self.conn.close()
 
     @staticmethod
+    def hash_password(password: str) -> bytes:
+        """
+        Hash the password using sha512.
+        :param password: the password to hash.
+        :return: the hashed password.
+        """
+
+        hashGen: hashlib.sha512 = hashlib.sha512()
+        hashGen.update(password.encode())
+        hashed = hashGen.digest()
+        return hashed
+
+    @staticmethod
     def is_valid_email(email: str) -> bool:
         """
         Check if the email is a valid format.
@@ -67,7 +85,7 @@ class Database:
 
         try:
             # check if the user exists
-            self.cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?;", (username, password))
+            self.cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?;", (username, self.hash_password(password)))
             user = self.cursor.fetchone()
             return user is not None
         except:
@@ -89,7 +107,7 @@ class Database:
         try:
             # create a new user in the database
             self.cursor.execute("INSERT INTO users (username, password, email) VALUES (?, ?, ?);",
-                                (username, password, email))
+                                (username, self.hash_password(password), email))
 
             # commit changes to the database
             self.conn.commit()

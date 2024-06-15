@@ -3,6 +3,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from Client.Gui.Widgets.interactive_button import InterActiveButton
 from Client.Gui.page_template import PageTemplate
 from command import Command, CommandName
 
@@ -30,21 +31,30 @@ class LoginPage(PageTemplate):
         Place the widgets in the frame.
         """
 
-        start_button = ttk.Button(self, text="Back", command=self.window.show_page("StartPage"))
-        start_button.place(x=800, y=200, width=50, height=50)
+        # create page title
+        self.create_text(600, 100, text="Login", font=("Arial", 60, "bold", "underline"))
 
-        login_button = ttk.Button(self, text="Signup", command=self.window.show_page("SignupPage"))
-        login_button.place(x=300, y=200, width=50, height=50)
+        # create the buttons
+        submit_button = InterActiveButton(self, text="Submit", command=self.submit_login_info)
+        submit_button.place(x=300, y=500, width=600, height=98)
 
-        signup_button = ttk.Button(self, text="Submit", command=self.submit_login_info)
-        signup_button.place(x=400, y=200, width=50, height=50)
+        home_button = InterActiveButton(self, text="Home", command=self.window.show_page("StartPage"), bg="#213c75")
+        home_button.place(x=300, y=600, width=198, height=70)
 
-        exit_button = ttk.Button(self, text="Exit", command=self.exit_event)
-        exit_button.place(x=500, y=200, width=50, height=50)
+        signup_button = InterActiveButton(self, text="Signup", command=self.window.show_page("SignupPage"), bg="#4a2175")
+        signup_button.place(x=501, y=600, width=197, height=70)
 
-        # place entries
-        self.username_entry.place(x=400, y=300, width=200, height=50)
-        self.password_entry.place(x=400, y=400, width=200, height=50)
+        exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
+        exit_button.place(x=701, y=600, width=199, height=70)
+
+        # place username entry
+        self.create_text(600, 280, text="Username", font=("Arial", 15, "bold"))
+        self.username_entry.place(x=300, y=300, width=600, height=50)
+
+        # place password entry
+        self.create_text(600, 380, text="Password", font=("Arial", 15, "bold"))
+        self.password_entry.place(x=300, y=400, width=600, height=50)
+
 
     def lock_entries(self):
         """
@@ -77,7 +87,6 @@ class LoginPage(PageTemplate):
     def submit_login_info(self):
         """
         Submit the login information to the server.
-        :return:
         """
 
         # lock the entries to prevent user from changing them
@@ -89,7 +98,6 @@ class LoginPage(PageTemplate):
 
         # check if the user is already logged in
         if not self.window.client.username is None:
-            # TODO
             return
 
         # check if the data is valid
@@ -108,12 +116,4 @@ class LoginPage(PageTemplate):
             return
         else:
             self.window.client.username = username_to_submit
-            self.open_start_game_button()
             return
-
-    def open_start_game_button(self):
-        """
-        Open the start game button for the client after logging in.
-        """
-
-        self.window.page_instances["StartPage"].start_button.config(state="enabled")

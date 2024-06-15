@@ -53,6 +53,15 @@ class Command:
         if len(args) == 1:
             self.__init_one(args[0])
         else:
+            # convert bytes to string if needed in the list of arguments
+            args_str: list[str] = []
+            for i in range(len(args)):
+                if isinstance(args[i], bytes):
+                    args_str.append(args[i].decode())
+                else:
+                    args_str.append(args[i])
+
+            # call the constructor with the joined string arguments
             self.__init_one(" ".join(args))
 
     def __init_one(self, data: str | bytes):

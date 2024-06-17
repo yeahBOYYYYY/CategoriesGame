@@ -39,7 +39,7 @@ class Command:
         CommandName.LOGIN: 2,
         CommandName.SIGNUP: 3,
         CommandName.INFO_REQUEST: 0,
-        CommandName.INFO_RESPONSE: 3,
+        CommandName.INFO_RESPONSE: 2,
         CommandName.WAITING: 0,
         CommandName.MATCH: 2
     }

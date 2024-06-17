@@ -143,7 +143,7 @@ class Database:
             score = self.cursor.fetchone()
 
             # extract first and only user found.
-            return score[0]
+            return score
         except:
             return -1, -1
 

@@ -102,7 +102,7 @@ class LoginPage(PageTemplate):
 
         # check if the data is valid
         try:
-            cmd: Command = Command("LOGIN", username_to_submit, password_to_submit)
+            cmd: Command = Command(CommandName.LOGIN.value, username_to_submit, password_to_submit)
         except:
             # TODO
             self.unlock_entries()
@@ -116,4 +116,21 @@ class LoginPage(PageTemplate):
             return
         else:
             self.window.client.username = username_to_submit
+            print("HERE")
+            self.get_user_score()
+            return
+
+    def get_user_score(self):
+        """
+        Get the user score from the server and save it in the client.
+        """
+
+        # send the command to the server and get the response
+        validity, response = self.window.client.send_and_get(Command(CommandName.INFO_REQUEST.value))
+        if (not validity) or (response.command != CommandName.INFO_RESPONSE):
+            # TODO
+            return
+        else:
+            self.window.client.score = response.args
+            self.window.page_instances["StartPage"].update_user()
             return

@@ -78,9 +78,8 @@ class ClientHandler:
         if self.username is None:
             return Command(CommandName.FAIL.value)
         else:
-            user_mail = self.server.database.get_mail(self.username)
             user_score = self.server.database.get_score(self.username)
-        return Command(CommandName.INFO_RESPONSE.value, self.username, user_mail, user_score)
+        return Command(CommandName.INFO_RESPONSE.value, str(user_score[0]), str(user_score[1]))
 
     def random_letter_for_match(self) -> str:
         """

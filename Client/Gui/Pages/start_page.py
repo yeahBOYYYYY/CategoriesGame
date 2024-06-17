@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import tkinter
+from tkinter import ttk
+
 from Client.Gui.Widgets.interactive_button import InterActiveButton
 from Client.Gui.page_template import PageTemplate
 
@@ -20,7 +23,7 @@ class StartPage(PageTemplate):
         self.start_button = InterActiveButton(self, text="Start game", command=self.start_game_if_valid)
 
         # initialize the user text id
-        self.user_txt_id = None
+        self.user_txt = ttk.Label(self, text="", font = ("Arial", 20, "bold"))
 
     def place_widgets(self) -> None:
         """
@@ -47,11 +50,24 @@ class StartPage(PageTemplate):
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
         exit_button.place(x=701, y=400, width=199, height=70)
 
+        # self.user_txt.config(text=f"Username: {self.window.client.username}\n Wins: {self.window.client.score[0]}\n Losses: {self.window.client.score[1]}")
+        # self.user_txt.place(x=600, y=600)
+
     def start_game_if_valid(self) -> None:
         """
         Start the game if the user is valid.
         """
+
         if self.window.client.username is None:
             self.window.show_page("LoginPage")()
         else:
             self.window.show_page("WaitingPage")()
+
+    def update_user(self) -> None:
+        """
+        Update the user welcome text.
+        """
+
+        self.user_txt.config(text=f"Username: {self.window.client.username}\n Wins: {self.window.client.score[0]}\n Losses: {self.window.client.score[1]}", justify="center")
+        self.user_txt.place(relx=0.5, y=600, anchor=tkinter.CENTER)
+        self.update_idletasks()

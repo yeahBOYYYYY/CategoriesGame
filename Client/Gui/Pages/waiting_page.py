@@ -44,6 +44,8 @@ class WaitingPage(PageTemplate):
             self.letter = response.args[1]
 
             print(f"Matched with {self.opponent_username} and got letter {self.letter}.")
+            self.window.page_instances["GamePage"].opponent_username = self.opponent_username
+            self.window.page_instances["GamePage"].letter = self.letter
             self.window.show_page("GamePage")()
 
     def ask_to_play(self) -> None:

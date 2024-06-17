@@ -14,6 +14,7 @@ class Client:
     """
 
     username: str | None = None  # client's username if logged to the server
+    score: list[int, int] = [0, 0]  # client's score if logged to the server
 
     def __init__(self, ip_address: str, port: int = Protocol.PORT):
         """

@@ -20,6 +20,15 @@ class InterActiveButton(tk.Button):
 
     def __init__(self, master, max_expansion:int=12, bg="#5ab35b",
                  fg="white", **kwargs):
+        """
+        Constructor for the InterActiveButton class.
+        :param master: The parent widget.
+        :param max_expansion: The maximum width the button can expand to.
+        :param bg: The background color of the button.
+        :param fg: The foreground color of the button.
+        :param kwargs: The keyword arguments to pass to the Button class.
+        """
+
         # Save some variables for later:
         self.max_expansion = max_expansion
         self.bg = bg
@@ -50,6 +59,10 @@ class InterActiveButton(tk.Button):
         self.mode = None
 
     def increase_width(self) -> None:
+        """
+        This function increases the width of the button.
+        """
+
         if self.width <= self.base_width + self.max_expansion:
             if self.mode == "increasing":
                 self.width += 1
@@ -57,6 +70,10 @@ class InterActiveButton(tk.Button):
                 super().after(5, self.increase_width)
 
     def decrease_width(self) -> None:
+        """
+        This function decreases the width of the button.
+        """
+
         if self.width > self.base_width:
             if self.mode == "decreasing":
                 self.width -= 1
@@ -64,6 +81,11 @@ class InterActiveButton(tk.Button):
                 super().after(5, self.decrease_width)
 
     def on_hover(self, event:tk.Event=None) -> None:
+        """
+        This function is called when the cursor enters the button.
+        :param event: The event object.
+        """
+
         # Improvement: use integers instead of "increasing" and "decreasing"
         self.mode = "increasing"
         # Swap the `bg` and the `fg` of the button
@@ -71,6 +93,11 @@ class InterActiveButton(tk.Button):
         super().after(5, self.increase_width)
 
     def on_leave(self, event:tk.Event=None) -> None:
+        """
+        This function is called when the cursor leaves the button.
+        :param event: The event object.
+        """
+
         # Improvement: use integers instead of "increasing" and "decreasing"
         self.mode = "decreasing"
         # Reset the `fg` and `bg` of the button

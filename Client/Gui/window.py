@@ -52,6 +52,7 @@ class Window(tk.Tk):
         Initialize the background image of the window.
         :return: the background image of the window.
         """
+
         bg_image_raw = Image.open(self.background_image_path)
         bg_image_resized = bg_image_raw.resize(self.window_size, Image.Resampling.LANCZOS)
         bg_image: ImageTk.PhotoImage = ImageTk.PhotoImage(bg_image_resized)

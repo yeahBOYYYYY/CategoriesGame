@@ -161,4 +161,4 @@ cython_debug/
 
 
 # sql database
-/Database/database.db
+*.db

@@ -89,6 +89,7 @@ class Server:
                     t.start()
                     self.users[user] = t
                 except InternalException as e:
+                    self.users[user].join()
                     internal_exception.handel_exceptions(e)
                     client_socket.close()
 

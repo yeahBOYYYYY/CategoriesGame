@@ -22,12 +22,8 @@ class GamePage(PageTemplate):
         """
         super().__init__(window)
 
-        # Timer variables
-        self.timer_seconds: int = 0
-        self.timer_minutes: int = 1
-        self.timer_text: str = "%02d:%02d" % (self.timer_minutes, self.timer_seconds)
-        self.timer_carry_on: bool = True
-        self.timer_label: ttk.Label | None = None
+        # the score of the user in this match
+        self.evaluated_score: int = 0
 
         # entry variables
         self.country: tk.StringVar = tk.StringVar()
@@ -43,14 +39,6 @@ class GamePage(PageTemplate):
         self.plant_entry: ttk.Entry = ttk.Entry(self, textvariable=self.plant)
         self.boy_entry: ttk.Entry = ttk.Entry(self, textvariable=self.boy)
         self.girl_entry: ttk.Entry = ttk.Entry(self, textvariable=self.girl)
-
-    def show_self(self) -> None:
-        """
-        Show the frame.
-        """
-        super().show_self()
-
-        self.start_timer()
     
     def place_widgets(self) -> None:
         """
@@ -61,11 +49,8 @@ class GamePage(PageTemplate):
         self.create_text(600, 100, text=f"Your letter is {self.letter}!", font=("Arial", 60, "bold", "underline"))
         self.create_text(600, 170, text=f"Opponent: {self.opponent_username}", font=("Arial", 15, "bold"))
 
-        self.timer_label = ttk.Label(self, text=self.timer_text)
-        self.timer_label.place(x=800, y=400, width=50, height=50)
-
         # create the buttons
-        submit_button = InterActiveButton(self, text="Submit", command=self.submit_answers)
+        submit_button = InterActiveButton(self, text="Submit", command=self.evaluate_score)
         submit_button.place(x=300, y=600, width=600, height=100)
 
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
@@ -122,47 +107,60 @@ class GamePage(PageTemplate):
         self.boy_entry.config(state="enabled")
         self.girl_entry.config(state="enabled")
 
-    def dec_timer(self) -> None:
+    def score_adder(self, answer: str, file_path: str) -> int:
         """
-        Decrease the timer by 1 second.
-        """
-
-        self.timer_seconds -= 1
-
-        if self.timer_seconds == -1:
-            self.timer_seconds = 59
-            self.timer_minutes -= 1
-
-        if self.timer_minutes == -1:
-            return
-
-        # change timer display text
-        self.timer_text = "%02d:%02d" % (self.timer_minutes, self.timer_seconds)
-        self.timer_label.configure(text=self.timer_text)
-        self.timer_label.update_idletasks()
-
-        # schedule next update 1 second later
-        self.window.after(1000, self.update)
-
-    def start_timer(self) -> None:
-        """
-        Start the timer.
+        Return how much to add to the score based on the answer.
+        :return:
         """
 
-        self.window.after(1000, self.update)
+        with open(file_path, 'r', encoding="utf-8") as file:
+            if (answer in file.read()) and (answer[0] == self.letter):
+                return 2
+        return 0
+
+    def evaluate_score(self) -> None:
+        """
+        Evaluate the score of the user and save it in self.evaluated_score.
+        """
+
+        # get the answers from the user
+        country = self.country.get()
+        city = self.city.get()
+        animal = self.animal.get()
+        plant = self.plant.get()
+        boy = self.boy.get()
+        girl = self.girl.get()
+
+        tmp_score = 0  # initialize new score
+        tmp_score += self.score_adder(country, "./Client/Answers/Country")
+        tmp_score += self.score_adder(city, "./Client/Answers/CityHeb")
+        tmp_score += int(self.score_adder(city, "./Client/Answers/City")/2)
+        tmp_score += self.score_adder(animal, "./Client/Answers/Animal")
+        tmp_score += self.score_adder(plant, "./Client/Answers/Plant")
+
+        self.evaluated_score = tmp_score
+        print(self.evaluated_score)
+        # tmp_score += self.score_adder(boy, "./Client/Answers/Country")
+        # tmp_score += self.score_adder(girl, "")
 
 
     def submit_answers(self):
         """
-        Get the user score from the server and save it in the client.
+        Send the user score to the server and wait to get a response if you won.
         """
 
+        self.lock_entries()
+
         # send the command to the server and get the response
-        validity, response = self.window.client.send_and_get(Command(CommandName.INFO_REQUEST.value))
-        if (not validity) or (response.command != CommandName.INFO_RESPONSE):
+        validity, response = self.window.client.send_and_get(Command(CommandName.ANSWERS.value, str(self.evaluated_score)))
+        if (not validity) or (response.command not in [CommandName.SUCCESS.value, CommandName.FAIL.value]):
             # TODO
             return
+        elif response.command == CommandName.SUCCESS.value:
+            pass
         else:
-            self.window.client.score = response.args
-            self.window.page_instances["StartPage"].update_user()
-            return
+            pass
+
+        self.get_user_score()
+        self.window.page_instances["GamePage"] = GamePage(self.window)
+        self.window.show_page("StartPage")()

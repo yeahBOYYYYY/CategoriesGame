@@ -96,7 +96,7 @@ class Window(tk.Tk):
             self.page_instances[P.__name__] = page
 
         # show the start page
-        self.show_page("GamePage")()
+        self.show_page("StartPage")()
 
     @staticmethod
     def create_text_with_outline(canvas: tk.Canvas, x: int, y: int, text_color: str, outline_color: str, **kwargs) -> None:

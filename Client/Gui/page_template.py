@@ -3,6 +3,8 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 
+from command import Command, CommandName
+
 
 class PageTemplate(tk.Canvas):
     """
@@ -50,3 +52,18 @@ class PageTemplate(tk.Canvas):
         """
 
         self.window.destroy()
+
+    def get_user_score(self) -> bool:
+        """
+        Get the user score from the server and save it in the client.
+        :returns: True if the user score was successfully retrieved, False otherwise.
+        """
+
+        # send the command to the server and get the response
+        validity, response = self.window.client.send_and_get(Command(CommandName.INFO_REQUEST.value))
+        if (not validity) or (response.command != CommandName.INFO_RESPONSE):
+            return False
+        else:
+            self.window.client.score = response.args
+            self.window.page_instances["StartPage"].update_user()
+            return True

@@ -42,6 +42,10 @@ class ClientHandler:
         self.opponent: ClientHandler | None = None
         self.letter: str | None = None
 
+        self.match_score: int | None = None
+        # condition for thread to wait for comparing match results
+        self.wait_for_match_score = threading.Condition()
+
     def login_request(self, username: str, password: str) -> Command:
         """
         Check if the user login info is valid in the database.
@@ -57,7 +61,7 @@ class ClientHandler:
 
     def signup_request(self, username: str, password: str, email: str) -> Command:
         """
-        Check if the user login info are valid in the database, if they are add them to the database.
+        Check if the user login info is valid in the database, if they are add them to the database.
         :param username: the username of the client.
         :param password: the password of the client.
         :param email: the email of the client.
@@ -80,6 +84,36 @@ class ClientHandler:
         else:
             user_score = self.server.database.get_score(self.username)
         return Command(CommandName.INFO_RESPONSE.value, str(user_score[0]), str(user_score[1]))
+
+    def compare_scores(self, score: str) -> Command:
+        """
+        Compare the scores of the two players in the game and send the results to the players.
+        """
+
+        self.match_score = int(score)
+
+        waited: bool = False  # if the user was in the waiting list
+
+        with self.opponent.wait_for_match_score:
+            if self.opponent.match_score is None:
+                # If the match_score of the opponent is empty, wait
+                waited = True
+                self.opponent.wait_for_match_score.wait(timeout=70)
+
+            if not waited:
+                self.wait_for_match_score.notify()
+
+        # get my score for updating the database
+        prev_score: tuple[int, int] = self.server.database.get_score(self.username)
+
+        if self.match_score < self.opponent.match_score:  # if I lost
+            new_score: tuple[int, int] = (prev_score[0], prev_score[1] + 1)
+            self.server.database.set_score(self.username, new_score)
+            return Command(CommandName.FAIL.value)
+        else:  # if I won or tied
+            new_score: tuple[int, int] = (prev_score[0] + 1, prev_score[1])
+            self.server.database.set_score(self.username, new_score)
+            return Command(CommandName.SUCCESS.value)
 
     def random_letter_for_match(self) -> str:
         """
@@ -153,6 +187,8 @@ class ClientHandler:
                     return self.info_request()
                 case CommandName.WAITING:
                     return self.wait_for_match()
+                case CommandName.ANSWERS:
+                    return self.compare_scores(*cmd.args)
                 case _:
                     raise InternalException("Command not meant for server.")
         except Exception as e:  # if there is a problem in Command class, move it upwards

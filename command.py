@@ -41,7 +41,8 @@ class Command:
         CommandName.INFO_REQUEST: 0,
         CommandName.INFO_RESPONSE: 2,
         CommandName.WAITING: 0,
-        CommandName.MATCH: 2
+        CommandName.MATCH: 2,
+        CommandName.ANSWERS: 1
     }
 
     def __init__(self, *args: str | bytes | CommandName):

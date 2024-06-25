@@ -56,6 +56,12 @@ class ClientHandler:
         :returns: the response command to the client.
         """
 
+        # check if already logged in
+        for user in self.server.users.keys():
+            if user.username == username:
+                return Command(CommandName.FAIL.value)
+
+        # check if the user is in database
         if self.server.database.is_valid_user(username, password):
             self.username = username
             return Command(CommandName.SUCCESS.value)

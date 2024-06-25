@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tkinter
 import tkinter as tk
 from tkinter import ttk
 
@@ -38,28 +39,28 @@ class SignupPage(PageTemplate):
 
         # create the buttons
         submit_button = InterActiveButton(self, text="Submit", command=self.submit_signup_info)
-        submit_button.place(x=300, y=500, width=600, height=98)
+        submit_button.place(x=300, y=600, width=600, height=98)
 
         home_button = InterActiveButton(self, text="Home", command=self.window.show_page("StartPage"), bg="#213c75")
-        home_button.place(x=300, y=600, width=198, height=70)
+        home_button.place(x=300, y=700, width=198, height=70)
 
         login_button = InterActiveButton(self, text="Login", command=self.window.show_page("LoginPage"), bg="#4a2175")
-        login_button.place(x=501, y=600, width=197, height=70)
+        login_button.place(x=501, y=700, width=197, height=70)
 
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
-        exit_button.place(x=701, y=600, width=199, height=70)
+        exit_button.place(x=701, y=700, width=199, height=70)
 
         # place username entry
-        self.create_text(600, 180, text="Username", font=("Arial", 15, "bold"))
-        self.username_entry.place(x=300, y=200, width=600, height=50)
+        self.create_text(600, 280, text="Username", font=("Arial", 15, "bold"))
+        self.username_entry.place(x=300, y=300, width=600, height=50)
 
         # place password entry
-        self.create_text(600, 280, text="Password", font=("Arial", 15, "bold"))
-        self.password_entry.place(x=300, y=300, width=600, height=50)
+        self.create_text(600, 380, text="Password", font=("Arial", 15, "bold"))
+        self.password_entry.place(x=300, y=400, width=600, height=50)
 
         # place email entry
-        self.create_text(600, 380, text="Email", font=("Arial", 15, "bold"))
-        self.email_entry.place(x=300, y=400, width=600, height=50)
+        self.create_text(600, 480, text="Email", font=("Arial", 15, "bold"))
+        self.email_entry.place(x=300, y=500, width=600, height=50)
 
     def lock_entries(self):
         """
@@ -104,14 +105,13 @@ class SignupPage(PageTemplate):
 
         # check if the user is already logged in
         if not self.window.client.username is None:
-            # TODO
             return
 
         # check if the data is valid
         try:
             cmd: Command = Command("SIGNUP", username_to_submit, password_to_submit, email_to_submit)
         except:
-            # TODO
+            self.update_message("Please enter a valid username, password and email.\nThe username, password and email must not contain spaces.")
             self.unlock_entries()
             return
 
@@ -124,6 +124,9 @@ class SignupPage(PageTemplate):
                 self.window.client.username = username_to_submit
                 if not self.get_user_score():
                     raise Exception()
+
+                self.update_message("You have been signed up successfully.")
+
         except Exception as e:
-            # TODO
+            self.update_message("Please try a different username, password and email.\nIf you have an account, please sign in.")
             self.unlock_entries()

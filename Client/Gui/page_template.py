@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tkinter
 import tkinter as tk
 from tkinter import ttk
 
@@ -19,6 +20,10 @@ class PageTemplate(tk.Canvas):
         super().__init__(window, width=window.window_size[0], height=window.window_size[1])
 
         self.window: "Window" = window
+
+        error_style = ttk.Style()
+        error_style.configure("Error.TLabel", foreground="red", background="white")
+        self.error_text = ttk.Label(self, text="", font=("Arial", 20, "bold"), style="Error.TLabel")
 
     def show_self(self) -> None:
         """
@@ -70,3 +75,14 @@ class PageTemplate(tk.Canvas):
                 return True
         except:
             return False
+
+    def update_message(self, text: str, y: int = 200) -> None:
+        """
+        Update the main message.
+        :param text: the text to update.
+        :param y: the y position to place the text at.
+        """
+
+        self.error_text.config(text=text, justify="center")
+        self.error_text.place(relx=0.5, y=y, anchor=tkinter.CENTER)
+        self.update_idletasks()

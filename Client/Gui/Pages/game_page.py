@@ -187,25 +187,27 @@ class GamePage(PageTemplate):
         Evaluate the score of the user and save it in self.evaluated_score.
         """
 
-        # get the answers from the user
-        country = self.country.get()
-        city = self.city.get()
-        animal = self.animal.get()
-        plant = self.plant.get()
-        boy = self.boy.get()
-        girl = self.girl.get()
+        try:
+            # get the answers from the user
+            country = self.country.get()
+            city = self.city.get()
+            animal = self.animal.get()
+            plant = self.plant.get()
+            boy = self.boy.get()
+            girl = self.girl.get()
 
-        tmp_score = 0  # initialize new score
-        tmp_score += self.score_adder(country, "./Client/Answers/Country")
-        tmp_score += self.score_adder(city, "./Client/Answers/CityHeb")
-        tmp_score += self.eng_score_adder(city, "./Client/Answers/City")
-        tmp_score += self.score_adder(animal, "./Client/Answers/Animal")
-        tmp_score += self.score_adder(plant, "./Client/Answers/Plant")
+            tmp_score = 0  # initialize new score
+            tmp_score += self.score_adder(country, "./Client/Answers/Country")
+            tmp_score += self.score_adder(city, "./Client/Answers/CityHeb")
+            tmp_score += self.eng_score_adder(city, "./Client/Answers/City")
+            tmp_score += self.score_adder(animal, "./Client/Answers/Animal")
+            tmp_score += self.score_adder(plant, "./Client/Answers/Plant")
+            tmp_score += self.score_adder(boy, "./Client/Answers/Boy")
+            tmp_score += self.score_adder(girl, "./Client/Answers/Girl")
 
-        self.evaluated_score = tmp_score
-        print(self.evaluated_score)
-        # tmp_score += self.score_adder(boy, "./Client/Answers/Country")
-        # tmp_score += self.score_adder(girl, "")
+            self.evaluated_score = tmp_score
+        except:
+            self.update_message("Please try entering different answers.")
 
     def submit_answers(self) -> None:
         """
@@ -214,22 +216,34 @@ class GamePage(PageTemplate):
 
         self.lock_entries()
 
-        # send the command to the server and get the response
-        validity, response = self.window.client.send_and_get(
-            Command(CommandName.ANSWERS.value, str(self.evaluated_score)))
-        if (not validity) or (response.command.value not in [CommandName.SUCCESS.value, CommandName.FAIL.value]):
-            # if the command is not valid set to error mode
-            self.game_result = -1
-            return
-        elif response.command.value == CommandName.SUCCESS.value:
-            # if the command is success set to win mode
-            self.game_result = 1
-        else:
-            # if the command is fail set to lose mode
-            self.game_result = 0
+        try:
+            # send the command to the server and get the response
+            validity, response = self.window.client.send_and_get(
+                Command(CommandName.ANSWERS.value, str(self.evaluated_score)))
+            if (not validity) or (response.command.value not in [CommandName.SUCCESS.value, CommandName.FAIL.value]):
+                # if the command is not valid set to error mode
+                self.update_message("Failed to submit answers.")
+                self.window.page_instances["StartPage"].update_message("Failed to submit answers.")
+                self.game_result = -1
+                return
+            elif response.command.value == CommandName.SUCCESS.value:
+                # if the command is success set to win mode
+                self.update_message("You won!")
+                self.window.page_instances["StartPage"].update_message("You won!")
+                self.game_result = 1
+            else:
+                # if the command is fail set to lose mode
+                self.update_message("You lost!")
+                self.window.page_instances["StartPage"].update_message("You lost!")
+                self.game_result = 0
 
-        # get the user score and update in StartPage
-        self.get_user_score()
+            # get the user score and update in StartPage
+            self.get_user_score()
+
+        except:  # if failed and thrown exception
+            self.update_message("Failed to submit answers.")
+            self.window.page_instances["StartPage"].update_message("Failed to submit answers.")
+            self.game_result = -1
 
 
     def game_timer(self, duration: int = 60) -> None:
@@ -238,11 +252,15 @@ class GamePage(PageTemplate):
         """
 
         # start a timer for the game
-        t = threading.Timer(duration, self.submit_answers)
-        t.start()
-        self.threads.append(t)
+        try:
+            t = threading.Timer(duration, self.submit_answers)
+            t.start()
+            self.threads.append(t)
 
-        self.check_if_game_finished()
+            self.check_if_game_finished()
+        except:
+            self.game_result = -1
+            self.update_message("Failed to submit answers.")
 
     def check_if_game_finished(self) -> None:
         """

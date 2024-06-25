@@ -35,19 +35,21 @@ class WaitingPage(PageTemplate):
         """
         Process the response from the server.
         """
+        try:
+            validity, response = self.window.client.send_and_get(Command(CommandName.WAITING.value))
+            if (not validity) or (response.command != CommandName.MATCH):
+                raise InternalException("Failed to send or get command from the server.")
+            else:
+                self.opponent_username = response.args[0]
+                self.letter = response.args[1]
 
-        validity, response = self.window.client.send_and_get(Command(CommandName.WAITING.value))
-        if (not validity) or (response.command != CommandName.MATCH):
-            raise InternalException("Failed to send or get command from the server.")
-        else:
-            self.opponent_username = response.args[0]
-            self.letter = response.args[1]
-
-            print(f"Matched with {self.opponent_username} and got letter {self.letter}.")
-            self.window.page_instances["GamePage"].opponent_username = self.opponent_username
-            self.window.page_instances["GamePage"].letter = self.letter
-            self.window.page_instances["GamePage"].game_timer()
-            self.window.show_page("GamePage")()
+                print(f"Matched with {self.opponent_username} and got letter {self.letter}.")
+                self.window.page_instances["GamePage"].opponent_username = self.opponent_username
+                self.window.page_instances["GamePage"].letter = self.letter
+                self.window.page_instances["GamePage"].game_timer()
+                self.window.show_page("GamePage")()
+        except Exception as e:
+            self.update_message("Failed to connect to the server. Please try again later.")
 
     def ask_to_play(self) -> None:
         """
@@ -59,7 +61,7 @@ class WaitingPage(PageTemplate):
             t = threading.Thread(target=self.process_response)
             t.start()
         except Exception as e:
-            print(e)
+            self.update_message("Failed to connect to the server. Please try again later.")
 
     def place_widgets(self) -> None:
         """

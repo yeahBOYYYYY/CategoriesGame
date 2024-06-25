@@ -12,6 +12,8 @@ class StartPage(PageTemplate):
     Start page of the application.
     """
 
+    game_result: int | None = None  # 0 for lose, 1 for win, -1 for error
+
     def __init__(self, window: "Window") -> None:
         """
         Initialize the login page.

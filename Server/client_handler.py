@@ -3,8 +3,6 @@ from __future__ import annotations
 import random
 import socket
 import threading
-import time
-import traceback
 
 import rsa
 
@@ -148,7 +146,7 @@ class ClientHandler:
                 # If the match_score of the opponent is empty, wait
                 waited = True
                 print("waiting for opponent", self.username)
-                self.opponent.wait_for_match_score.wait()
+                self.opponent.wait_for_match_score.wait(timeout=120)
                 print("done waiting for opponent", self.username)
 
             if not waited:
@@ -160,10 +158,19 @@ class ClientHandler:
         self.wait_for_match_score = threading.Condition()  # reset the condition
 
         print("comparing scores", self.username)
+
+        result_command: Command | None = None
         if self.match_score < self.opponent.match_score:  # if I lost
-            return self.lost_in_match()
+            result_command = self.lost_in_match()
         else:  # if I won or tied
-            return self.won_in_match()
+            result_command = self.won_in_match()
+
+        # reset the opponent and the letter
+        self.opponent = None
+        self.letter = None
+        self.match_score = None
+
+        return result_command
 
     def random_letter_for_match(self) -> str:
         """

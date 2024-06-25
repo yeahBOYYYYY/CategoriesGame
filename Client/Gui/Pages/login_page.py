@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import tkinter
 import tkinter as tk
 from tkinter import ttk
 
@@ -36,24 +37,24 @@ class LoginPage(PageTemplate):
 
         # create the buttons
         submit_button = InterActiveButton(self, text="Submit", command=self.submit_login_info)
-        submit_button.place(x=300, y=500, width=600, height=98)
+        submit_button.place(x=300, y=600, width=600, height=98)
 
         home_button = InterActiveButton(self, text="Home", command=self.window.show_page("StartPage"), bg="#213c75")
-        home_button.place(x=300, y=600, width=198, height=70)
+        home_button.place(x=300, y=700, width=198, height=70)
 
         signup_button = InterActiveButton(self, text="Signup", command=self.window.show_page("SignupPage"), bg="#4a2175")
-        signup_button.place(x=501, y=600, width=197, height=70)
+        signup_button.place(x=501, y=700, width=197, height=70)
 
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
-        exit_button.place(x=701, y=600, width=199, height=70)
+        exit_button.place(x=701, y=700, width=199, height=70)
 
         # place username entry
-        self.create_text(600, 280, text="Username", font=("Arial", 15, "bold"))
-        self.username_entry.place(x=300, y=300, width=600, height=50)
+        self.create_text(600, 380, text="Username", font=("Arial", 15, "bold"))
+        self.username_entry.place(x=300, y=400, width=600, height=50)
 
         # place password entry
-        self.create_text(600, 380, text="Password", font=("Arial", 15, "bold"))
-        self.password_entry.place(x=300, y=400, width=600, height=50)
+        self.create_text(600, 480, text="Password", font=("Arial", 15, "bold"))
+        self.password_entry.place(x=300, y=500, width=600, height=50)
 
 
     def lock_entries(self):
@@ -104,7 +105,7 @@ class LoginPage(PageTemplate):
         try:
             cmd: Command = Command(CommandName.LOGIN.value, username_to_submit, password_to_submit)
         except:
-            # TODO
+            self.update_message("Please enter a valid username and password.\nThe username and password must not contain spaces.")
             self.unlock_entries()
             return
 
@@ -117,7 +118,9 @@ class LoginPage(PageTemplate):
                 self.window.client.username = username_to_submit
                 if not self.get_user_score():
                     raise Exception()
+
+                self.update_message("You have been logged in successfully.")
+
         except Exception as e:
-            # TODO
+            self.update_message("Please try a different username and password.\nIf you don't have an account, please sign up.")
             self.unlock_entries()
-            return

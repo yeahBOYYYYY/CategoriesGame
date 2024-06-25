@@ -174,6 +174,7 @@ class Client:
         print("Sent command to server.")
 
         validity, cmd = Protocol.get_msg(self.server_socket, self.private_key)
+        print("Got command from server.")
 
         return validity, cmd
 

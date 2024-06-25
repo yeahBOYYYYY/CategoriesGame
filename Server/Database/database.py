@@ -1,6 +1,7 @@
 import hashlib
 import re
 import sqlite3
+import time
 
 
 class Database:
@@ -137,15 +138,18 @@ class Database:
         :return: the score of the user.
         """
 
-        try:
-            # get the score of the user
-            self.cursor.execute("SELECT wins, losses FROM users WHERE username = ?;", (username,))
-            score = self.cursor.fetchone()
+        for _ in range(10):  # try 10 times to get the score, for threading purposes
+            try:
+                # get the score of the user
+                self.cursor.execute("SELECT wins, losses FROM users WHERE username = ?;", (username,))
+                score = self.cursor.fetchone()
 
-            # extract first and only user found.
-            return score
-        except:
-            return -1, -1
+                # extract first and only user found.
+                return score
+            except:
+                time.sleep(0.1)
+
+        return -1, -1
 
     def set_score(self, username: str, score: tuple[int, int]) -> bool:
         """
@@ -158,16 +162,19 @@ class Database:
         if (score[0] < 0) or (score[1] < 0):
             return False
 
-        try:
-            # set the score of the user
-            self.cursor.execute("UPDATE users SET wins = ?, losses = ? WHERE username = ?;",
-                                (score[0], score[1], username))
+        for _ in range(10):  # try 10 times to get the score, for threading purposes
+            try:
+                # set the score of the user
+                self.cursor.execute("UPDATE users SET wins = ?, losses = ? WHERE username = ?;",
+                                    (score[0], score[1], username))
 
-            # commit changes to the database
-            self.conn.commit()
-            return True
-        except:
-            return False
+                # commit changes to the database
+                self.conn.commit()
+                return True
+            except:
+                time.sleep(0.1)
+
+        return False
 
 
 if __name__ == '__main__':

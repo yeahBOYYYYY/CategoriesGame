@@ -3,6 +3,8 @@ from __future__ import annotations
 import random
 import socket
 import threading
+import time
+import traceback
 
 import rsa
 
@@ -85,6 +87,47 @@ class ClientHandler:
             user_score = self.server.database.get_score(self.username)
         return Command(CommandName.INFO_RESPONSE.value, str(user_score[0]), str(user_score[1]))
 
+    def lost_in_match(self) -> Command:
+        """
+        Notify the user that he lost in the match and update score with wait for threading.
+        :returns: fail command if the score was updated, error command if the score wasn't updated after 10 tries.
+        """
+
+        print("I lost", self.username)
+
+        # get the previous score of the user
+        prev_score: tuple[int, int] = self.server.database.get_score(self.username)
+
+        new_score: tuple[int, int] = (prev_score[0], prev_score[1] + 1)
+
+        print(self.username, prev_score, new_score)
+
+        if self.server.database.set_score(self.username, new_score):
+            return Command(CommandName.FAIL.value)
+        else:
+            return Command(CommandName.ERROR.value)
+
+
+    def won_in_match(self) -> Command:
+        """
+        Notify the user that he won in the match and update score.
+        :returns: success command if the score was updated, error command if the score wasn't updated after 10 tries.
+        """
+
+        print("I won", self.username)
+
+        # get the previous score of the user
+        prev_score: tuple[int, int] = self.server.database.get_score(self.username)
+
+        new_score: tuple[int, int] = (prev_score[0] + 1, prev_score[1])
+
+        print(self.username, prev_score, new_score)
+
+        if self.server.database.set_score(self.username, new_score):
+            return Command(CommandName.SUCCESS.value)
+        else:
+            return Command(CommandName.ERROR.value)
+
     def compare_scores(self, score: str) -> Command:
         """
         Compare the scores of the two players in the game and send the results to the players.
@@ -98,22 +141,23 @@ class ClientHandler:
             if self.opponent.match_score is None:
                 # If the match_score of the opponent is empty, wait
                 waited = True
-                self.opponent.wait_for_match_score.wait(timeout=70)
+                print("waiting for opponent", self.username)
+                self.opponent.wait_for_match_score.wait()
+                print("done waiting for opponent", self.username)
 
             if not waited:
+                print("not waiting for opponent", self.username)
+                self.wait_for_match_score.acquire()
                 self.wait_for_match_score.notify()
+                self.wait_for_match_score.release()
 
-        # get my score for updating the database
-        prev_score: tuple[int, int] = self.server.database.get_score(self.username)
+        self.wait_for_match_score = threading.Condition()  # reset the condition
 
+        print("comparing scores", self.username)
         if self.match_score < self.opponent.match_score:  # if I lost
-            new_score: tuple[int, int] = (prev_score[0], prev_score[1] + 1)
-            self.server.database.set_score(self.username, new_score)
-            return Command(CommandName.FAIL.value)
+            return self.lost_in_match()
         else:  # if I won or tied
-            new_score: tuple[int, int] = (prev_score[0] + 1, prev_score[1])
-            self.server.database.set_score(self.username, new_score)
-            return Command(CommandName.SUCCESS.value)
+            return self.won_in_match()
 
     def random_letter_for_match(self) -> str:
         """
@@ -166,7 +210,7 @@ class ClientHandler:
         Handles the request from the client.
         :param validity: the validity of the command.
         :param cmd: the command to handle.
-        :param prev_cmd: the last command sent from server.
+        :param prev_cmd: the last command sent from the server.
         :returns: the response command to the client.
         """
 
@@ -246,7 +290,7 @@ class ClientHandler:
             try:  # handle the request, if not valid will send an exception
                 response_command: Command = self.handle_request(validity, cmd, prev_response_command)
                 print(f"Received: {cmd.command.value} with args {cmd.args}")
-                print(f"Responding with: {response_command.command.value}")
+                print(f"Responding with: {response_command.command.value} with args {response_command.args}")
             except:
                 response_command: Command = Command(CommandName.ERROR.value)
 

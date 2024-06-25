@@ -59,11 +59,14 @@ class PageTemplate(tk.Canvas):
         :returns: True if the user score was successfully retrieved, False otherwise.
         """
 
-        # send the command to the server and get the response
-        validity, response = self.window.client.send_and_get(Command(CommandName.INFO_REQUEST.value))
-        if (not validity) or (response.command != CommandName.INFO_RESPONSE):
+        try:
+            # send the command to the server and get the response
+            validity, response = self.window.client.send_and_get(Command(CommandName.INFO_REQUEST.value))
+            if (not validity) or (response.command != CommandName.INFO_RESPONSE):
+                return False
+            else:
+                self.window.client.score = response.args
+                self.window.page_instances["StartPage"].update_user()
+                return True
+        except:
             return False
-        else:
-            self.window.client.score = response.args
-            self.window.page_instances["StartPage"].update_user()
-            return True

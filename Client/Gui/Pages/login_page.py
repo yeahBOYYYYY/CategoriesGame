@@ -109,12 +109,15 @@ class LoginPage(PageTemplate):
             return
 
         # send the command to the server and get the response
-        validity, response = self.window.client.send_and_get(cmd)
-        if (not validity) or (response.command != CommandName.SUCCESS):
+        try:
+            validity, response = self.window.client.send_and_get(cmd)
+            if (not validity) or (response.command != CommandName.SUCCESS):
+                raise Exception()
+            else:
+                self.window.client.username = username_to_submit
+                if not self.get_user_score():
+                    raise Exception()
+        except Exception as e:
             # TODO
             self.unlock_entries()
-            return
-        else:
-            self.window.client.username = username_to_submit
-            self.get_user_score()
             return

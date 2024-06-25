@@ -6,9 +6,8 @@ import threading
 
 import rsa
 
-from Server.Database.database import Database
-from command import Command, CommandName
 import internal_exception
+from command import Command, CommandName
 from internal_exception import InternalException
 from protocol import Protocol
 
@@ -110,7 +109,6 @@ class ClientHandler:
             return Command(CommandName.FAIL.value)
         else:
             return Command(CommandName.ERROR.value)
-
 
     def won_in_match(self) -> Command:
         """
@@ -217,7 +215,6 @@ class ClientHandler:
                     return self.wait_for_match()
         return Command(CommandName.MATCH.value, self.opponent.username, self.letter)
 
-
     def handle_request(self, validity: bool, cmd: Command, prev_cmd: Command) -> Command:
         """
         Handles the request from the client.
@@ -256,7 +253,7 @@ class ClientHandler:
         Perform a three-way handshake with the client.
         :return: True if the handshake was successful, False otherwise.
         """
-        
+
         # send HELLO with public key to client.
         response = Protocol.create_msg(Command(CommandName.HELLO.value, str(self.server.public_key.n)))
         self.client_socket.send(response)
@@ -275,7 +272,6 @@ class ClientHandler:
         self.client_socket.send(response)
 
         return client_public_key
-
 
     def handle_client(self) -> None:
         """

@@ -1,14 +1,14 @@
-from typing import Callable
 import tkinter as tk
+from typing import Callable
 
 from PIL import Image, ImageTk
 
 from Client.Gui.Pages.game_page import GamePage
 from Client.Gui.Pages.login_page import LoginPage
-from Client.Gui.page_template import PageTemplate
 from Client.Gui.Pages.signup_page import SignupPage
 from Client.Gui.Pages.start_page import StartPage
 from Client.Gui.Pages.waiting_page import WaitingPage
+from Client.Gui.page_template import PageTemplate
 from internal_exception import InternalException
 
 
@@ -99,7 +99,8 @@ class Window(tk.Tk):
         self.show_page("StartPage")()
 
     @staticmethod
-    def create_text_with_outline(canvas: tk.Canvas, x: int, y: int, text_color: str, outline_color: str, **kwargs) -> None:
+    def create_text_with_outline(canvas: tk.Canvas, x: int, y: int, text_color: str, outline_color: str,
+                                 **kwargs) -> None:
         """
         Create text with an outline.
         :param canvas: The canvas to draw the text on.

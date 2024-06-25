@@ -2,9 +2,9 @@ import sys
 
 import internal_exception
 from Client.client import Client
+from Server.server import Server
 from internal_exception import InternalException
 from protocol import Protocol
-from Server.server import Server
 
 
 def start_client(ip: str) -> None:  # python main.py client 127.0.0.1
@@ -16,6 +16,7 @@ def start_client(ip: str) -> None:  # python main.py client 127.0.0.1
     client = Client(ip, Protocol.PORT)
     client.main()
 
+
 def start_server() -> None:  # python main.py server
     """
     Start the server.
@@ -23,6 +24,7 @@ def start_server() -> None:  # python main.py server
 
     server = Server("0.0.0.0", Protocol.PORT)
     server.main()
+
 
 def main(args: list[str]):
     try:

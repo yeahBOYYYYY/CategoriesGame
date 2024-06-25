@@ -18,7 +18,7 @@ class InterActiveButton(tk.Button):
     This button is based on the answer from here: https://stackoverflow.com/questions/68166640/interactive-and-nice-looking-buttons-in-tkinter
     """
 
-    def __init__(self, master, max_expansion:int=12, bg="#5ab35b",
+    def __init__(self, master, max_expansion: int = 12, bg="#5ab35b",
                  fg="white", **kwargs):
         """
         Constructor for the InterActiveButton class.
@@ -44,7 +44,6 @@ class InterActiveButton(tk.Button):
                            image=self.pixel, activeforeground=fg)
         button_args.update(kwargs)
         super().__init__(master, bg=bg, fg=fg, **button_args)
-
 
         # Bind to the cursor entering and exiting the button:
         super().bind("<Enter>", self.on_hover)
@@ -80,7 +79,7 @@ class InterActiveButton(tk.Button):
                 super().config(width=self.width)
                 super().after(5, self.decrease_width)
 
-    def on_hover(self, event:tk.Event=None) -> None:
+    def on_hover(self, event: tk.Event = None) -> None:
         """
         This function is called when the cursor enters the button.
         :param event: The event object.
@@ -92,7 +91,7 @@ class InterActiveButton(tk.Button):
         super().config(bg=self.fg, fg=self.bg)
         super().after(5, self.increase_width)
 
-    def on_leave(self, event:tk.Event=None) -> None:
+    def on_leave(self, event: tk.Event = None) -> None:
         """
         This function is called when the cursor leaves the button.
         :param event: The event object.

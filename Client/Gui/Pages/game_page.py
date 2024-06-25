@@ -17,7 +17,7 @@ class GamePage(PageTemplate):
     heb_to_eng: dict[str, str] = {"א": "a", "ב": "b", "ג": "g", "ד": "d", "ה": "h", "ו": "v", "ז": "z", "ח": "h",
                                   "ט": "t", "י": "y", "כ": "k", "ל": "l", "מ": "m", "נ": "n", "ס": "s", "ע": "a",
                                   "פ": "p", "צ": "c", "ק": "k", "ר": "r", "ש": "s", "ת": "t"
-    }
+                                  }
 
     opponent_username: str | None = None
     letter: str | None = None
@@ -48,7 +48,7 @@ class GamePage(PageTemplate):
         self.plant_entry: ttk.Entry = ttk.Entry(self, textvariable=self.plant)
         self.boy_entry: ttk.Entry = ttk.Entry(self, textvariable=self.boy)
         self.girl_entry: ttk.Entry = ttk.Entry(self, textvariable=self.girl)
-    
+
     def place_widgets(self) -> None:
         """
         Place the widgets in the frame.
@@ -64,7 +64,6 @@ class GamePage(PageTemplate):
 
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
         exit_button.place(x=990, y=720, width=200, height=70)
-
 
         # place country entry
         self.create_text(950, 262, text=":ארץ", font=("Arial", 15, "bold"))
@@ -244,7 +243,6 @@ class GamePage(PageTemplate):
             self.update_message("Failed to submit answers.")
             self.window.page_instances["StartPage"].update_message("Failed to submit answers.")
             self.game_result = -1
-
 
     def game_timer(self, duration: int = 60) -> None:
         """

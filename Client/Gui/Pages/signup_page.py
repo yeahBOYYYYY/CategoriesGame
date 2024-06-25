@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import tkinter
 import tkinter as tk
 from tkinter import ttk
 
@@ -111,7 +110,8 @@ class SignupPage(PageTemplate):
         try:
             cmd: Command = Command("SIGNUP", username_to_submit, password_to_submit, email_to_submit)
         except:
-            self.update_message("Please enter a valid username, password and email.\nThe username, password and email must not contain spaces.")
+            self.update_message(
+                "Please enter a valid username, password and email.\nThe username, password and email must not contain spaces.")
             self.unlock_entries()
             return
 
@@ -128,5 +128,6 @@ class SignupPage(PageTemplate):
                 self.update_message("You have been signed up successfully.")
 
         except Exception as e:
-            self.update_message("Please try a different username, password and email.\nIf you have an account, please sign in.")
+            self.update_message(
+                "Please try a different username, password and email.\nIf you have an account, please sign in.")
             self.unlock_entries()

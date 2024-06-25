@@ -86,7 +86,8 @@ class Database:
 
         try:
             # check if the user exists
-            self.cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?;", (username, self.hash_password(password)))
+            self.cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?;",
+                                (username, self.hash_password(password)))
             user = self.cursor.fetchone()
             return user is not None
         except:

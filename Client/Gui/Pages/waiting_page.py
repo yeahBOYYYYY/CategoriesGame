@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import threading
-from tkinter import ttk
 
 from Client.Gui.Widgets.interactive_button import InterActiveButton
 from Client.Gui.page_template import PageTemplate

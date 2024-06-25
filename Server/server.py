@@ -1,12 +1,13 @@
 import socket
 import threading
+
 import rsa
 
 import internal_exception
+from Server.Database.database import Database
 from Server.client_handler import ClientHandler
 from internal_exception import InternalException
 from protocol import Protocol
-from Server.Database.database import Database
 
 
 class Server:

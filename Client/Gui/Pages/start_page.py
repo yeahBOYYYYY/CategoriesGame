@@ -25,7 +25,7 @@ class StartPage(PageTemplate):
         self.start_button = InterActiveButton(self, text="Start game", command=self.start_game_if_valid)
 
         # initialize the user text id
-        self.user_txt = ttk.Label(self, text="", font = ("Arial", 20, "bold"))
+        self.user_txt = ttk.Label(self, text="", font=("Arial", 20, "bold"))
 
     def place_widgets(self) -> None:
         """
@@ -37,7 +37,7 @@ class StartPage(PageTemplate):
         self.window.create_text_with_outline(self, 600, 100, "#05fafa", "black",
                                              text="!משחק ארץ עיר אחד על אחד",
                                              font=("Arial", 60, "bold")
-        )
+                                             )
 
         # create the start button
         self.start_button.place(x=300, y=300, width=600, height=98)
@@ -46,7 +46,8 @@ class StartPage(PageTemplate):
         login_button = InterActiveButton(self, text="Login", command=self.window.show_page("LoginPage"), bg="#213c75")
         login_button.place(x=300, y=400, width=198, height=70)
 
-        signup_button = InterActiveButton(self, text="Signup", command=self.window.show_page("SignupPage"), bg="#4a2175")
+        signup_button = InterActiveButton(self, text="Signup", command=self.window.show_page("SignupPage"),
+                                          bg="#4a2175")
         signup_button.place(x=501, y=400, width=197, height=70)
 
         exit_button = InterActiveButton(self, text="Exit", command=self.exit_event, bg="#752121")
@@ -70,6 +71,8 @@ class StartPage(PageTemplate):
         Update the user welcome text.
         """
 
-        self.user_txt.config(text=f"Username: {self.window.client.username}\n Wins: {self.window.client.score[0]}\n Losses: {self.window.client.score[1]}", justify="center")
+        self.user_txt.config(
+            text=f"Username: {self.window.client.username}\n Wins: {self.window.client.score[0]}\n Losses: {self.window.client.score[1]}",
+            justify="center")
         self.user_txt.place(relx=0.5, y=600, anchor=tkinter.CENTER)
         self.update_idletasks()

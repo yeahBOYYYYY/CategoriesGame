@@ -38,7 +38,8 @@ class AESCipher:
         """
 
         cipher = AES.new(self.key, AES.MODE_EAX, nonce=self.nonce)
-        padded_private_msg = msg + (self.padding_character * ((16 - len(msg)) % 16))  # AES works only on blocks of 16 bytes
+        padded_private_msg = msg + (
+                    self.padding_character * ((16 - len(msg)) % 16))  # AES works only on blocks of 16 bytes
         encrypted_msg = cipher.encrypt(padded_private_msg.encode("utf-8"))
         return encrypted_msg
 

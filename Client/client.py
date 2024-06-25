@@ -2,10 +2,10 @@ import socket
 
 import rsa
 
+from Client.Gui.window import Window
 from command import Command, CommandName
 from internal_exception import InternalException
 from protocol import Protocol
-from Client.Gui.window import Window
 
 
 class Client:

@@ -14,6 +14,7 @@ class Protocol:
     PORT: int = 9960  # the port of the server
     ERROR_LIMIT: int = 10  # limit of sequential errors
     RSA_KEY_SIZE: int = 512  # the size of the RSA key in bits
+    TIMEOUT: int = 60  # the timeout of the server connection with a client
 
     @staticmethod
     def create_msg(cmd: Command, public_key: rsa.PublicKey | None = None) -> bytes:
@@ -85,7 +86,9 @@ class Protocol:
 
             return True, Command(message)
 
-        except:
+        except socket.timeout as e:  # if the socket timed out
+            raise e
+        except Exception as e:  # if the message is not valid
             return False, None
 
 

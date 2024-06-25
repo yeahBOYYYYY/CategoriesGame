@@ -80,6 +80,7 @@ class Server:
 
             while True:
                 client_socket, client_address = self.server_socket.accept()
+                client_socket.settimeout(Protocol.TIMEOUT)
                 print(f"Connection from {client_address}")
 
                 # start a thread for the client

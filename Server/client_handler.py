@@ -291,7 +291,11 @@ class ClientHandler:
 
         # handle requests until user asks to exit
         while True:
-            validity, cmd = Protocol.get_msg(self.client_socket, self.server.private_key)
+            try:
+                validity, cmd = Protocol.get_msg(self.client_socket, self.server.private_key)
+            except Exception as e:
+                internal_exception.handel_exceptions(e)
+                break  # if the connection timed out, break the loop
 
             try:  # handle the request, if not valid will send an exception
                 response_command: Command = self.handle_request(validity, cmd, prev_response_command)
@@ -325,3 +329,4 @@ class ClientHandler:
 
         self.client_socket.close()
         print(f"Closing connection with {self.client_address}")
+        del self.server.users[self]  # remove self from the server users list
